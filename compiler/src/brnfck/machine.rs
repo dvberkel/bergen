@@ -9,7 +9,7 @@ struct BuildMachine<'a> {
 }
 
 impl<'a> BuildMachine<'a> {
-	fn with(instructions: &'a [Command]) -> Self {
+	fn with(instructions: &'a[Command]) -> Self {
 		BuildMachine { instructions, cell_pointer: 0, cells: [0; SIZE] }
 	}
 
@@ -22,22 +22,24 @@ impl<'a> BuildMachine<'a> {
 		BuildMachine { instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
 	}
 
-	fn build(self) -> Machine {
-		Machine { cell_pointer: self.cell_pointer, cells: self.cells }
+	fn build(self) -> Machine<'a> {
+		Machine { instruction_pointer: 0, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
 	}
 }
 
-pub struct Machine {
+pub struct Machine<'a> {
+	instruction_pointer: usize,
+	instructions: &'a[Command],
 	cell_pointer: usize,
 	cells: [u8; SIZE],
 }
 
-impl Machine {
-	pub fn new() -> Machine {
-		Machine { cell_pointer: 0, cells : [0;SIZE] }
+impl<'a> Machine<'a> {
+	pub fn new() -> Machine<'a> {
+		Machine { instruction_pointer: 0, instructions: &[], cell_pointer: 0, cells : [0;SIZE] }
 	}
 
-	pub fn execute(mut self, command: Command) -> Result<Machine, MachineError> {
+	pub fn execute(mut self, command: Command) -> Result<Machine<'a>, MachineError> {
 		match command {
 			Command::IncrementPointer => {
 				self.cell_pointer = if self.cell_pointer  < SIZE - 1 { self.cell_pointer + 1 } else { 0 }; 
@@ -45,12 +47,12 @@ impl Machine {
 			Command::DecrementPointer => { 
 				self.cell_pointer = if self.cell_pointer != 0 { self.cell_pointer - 1 } else { SIZE - 1 }; 
 			}
-			Command::Increment        => { 
+			Command::Increment => { 
 				let current_value = self.cells[self.cell_pointer];
 				let value = if current_value != u8::max_value() { current_value + 1 } else { u8::min_value() };
 				self.cells[self.cell_pointer] = value;
 			}
-			Command::Decrement        => { 
+			Command::Decrement => { 
 				let current_value = self.cells[self.cell_pointer];
 				let value = if current_value != u8::min_value() { current_value - 1 } else { u8::max_value() };
 				self.cells[self.cell_pointer] = value;
@@ -60,7 +62,7 @@ impl Machine {
 	}
 }
 
-impl PartialEq for Machine {
+impl<'a> PartialEq for Machine<'a> {
 	fn eq(&self, rhs: &Self) -> bool {
 		if self.cell_pointer.eq(&rhs.cell_pointer) {
 			let mut index = 0;
@@ -74,9 +76,9 @@ impl PartialEq for Machine {
 	}
 }
 
-impl Eq for Machine {}
+impl<'a> Eq for Machine<'a> {}
 
-impl Debug for Machine {
+impl<'a> Debug for Machine<'a> {
 	fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
 		write!(f, "<{};[", self.cell_pointer)?;
 		for index in 0..SIZE {
