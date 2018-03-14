@@ -35,8 +35,8 @@ pub struct Machine<'a> {
 }
 
 impl<'a> Machine<'a> {
-	pub fn new() -> Machine<'a> {
-		Machine { instruction_pointer: 0, instructions: &[], cell_pointer: 0, cells : [0;SIZE] }
+	pub fn new(instructions: &'a[Command]) -> Machine<'a> {
+		Machine { instruction_pointer: 0, instructions: instructions, cell_pointer: 0, cells : [0;SIZE] }
 	}
 
 	pub fn execute(mut self, command: Command) -> Result<Machine<'a>, MachineError> {
@@ -94,6 +94,7 @@ pub enum MachineError {
 	Unknown
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum Command {
 	IncrementPointer,
 	DecrementPointer,
@@ -113,7 +114,8 @@ mod tests {
 			(Command::Increment, BuildMachine::with(&[]).cell(0, 1).build()),
 			(Command::Decrement, BuildMachine::with(&[]).cell(0, u8::max_value()).build()),
 		] {
-			let mut machine = Machine::new();
+			let instructions = [instruction];
+			let mut machine = Machine::new(&instructions);
 
 			if let Ok(result_machine) = machine.execute(instruction) {
 				assert_eq!(result_machine, expected_machine);
