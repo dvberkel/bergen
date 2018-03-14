@@ -39,7 +39,8 @@ impl<'a> Machine<'a> {
 		Machine { instruction_pointer: 0, instructions: instructions, cell_pointer: 0, cells : [0;SIZE] }
 	}
 
-	pub fn execute(mut self, command: Command) -> Result<Machine<'a>, MachineError> {
+	pub fn execute(mut self) -> Result<Machine<'a>, MachineError> {
+		let command = self.instructions[self.instruction_pointer];
 		match command {
 			Command::IncrementPointer => {
 				self.cell_pointer = if self.cell_pointer  < SIZE - 1 { self.cell_pointer + 1 } else { 0 }; 
@@ -117,7 +118,7 @@ mod tests {
 			let instructions = [instruction];
 			let mut machine = Machine::new(&instructions);
 
-			if let Ok(result_machine) = machine.execute(instruction) {
+			if let Ok(result_machine) = machine.execute() {
 				assert_eq!(result_machine, expected_machine);
 			} else {
 				assert!(false);
@@ -127,25 +128,25 @@ mod tests {
 
 	#[test]
 	fn increment_pointer_wraps_around() {
-			let mut machine = BuildMachine::with(&[]).pointer_at(SIZE - 1).build();
+		let instructions = [Command::IncrementPointer];			
+		let mut machine = BuildMachine::with(&instructions).pointer_at(SIZE - 1).build();
 
-			if let Ok(result_machine) = machine.execute(Command::IncrementPointer) {
-				assert_eq!(result_machine, BuildMachine::with(&[]).pointer_at(0).build());
-			} else {
-				assert!(false);
-			}
-
+		if let Ok(result_machine) = machine.execute() {
+			assert_eq!(result_machine, BuildMachine::with(&instructions).pointer_at(0).build());
+		} else {
+			assert!(false);
+		}
 	}
 
 	#[test]
 	fn increment_wraps_around() {
-			let mut machine = BuildMachine::with(&[]).cell(0, u8::max_value()).build();
+		let instructions = [Command::Increment];			
+		let mut machine = BuildMachine::with(&instructions).cell(0, u8::max_value()).build();
 
-			if let Ok(result_machine) = machine.execute(Command::Increment) {
-				assert_eq!(result_machine, BuildMachine::with(&[]).cell(0,0).build());
-			} else {
-				assert!(false);
-			}
-
+		if let Ok(result_machine) = machine.execute() {
+			assert_eq!(result_machine, BuildMachine::with(&instructions).cell(0,0).build());
+		} else {
+			assert!(false);
+		}
 	}
 } 
