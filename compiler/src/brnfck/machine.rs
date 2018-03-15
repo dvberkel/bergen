@@ -65,6 +65,8 @@ impl<'a> Machine<'a> {
 
 impl<'a> PartialEq for Machine<'a> {
 	fn eq(&self, rhs: &Self) -> bool {
+		if self.instruction_pointer != rhs.instruction_pointer { return false; }
+		if self.instructions != rhs.instructions { return false; }
 		if self.cell_pointer != rhs.cell_pointer { return false; }
 		if !same_cells(&self.cells, &rhs.cells) { return false; }
 		true
@@ -84,13 +86,17 @@ impl<'a> Eq for Machine<'a> {}
 
 impl<'a> Debug for Machine<'a> {
 	fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
-		write!(f, "<{};[", self.cell_pointer)?;
+		write!(f, "<{}:[", self.instruction_pointer);
+		for instruction in self.instructions {
+			write!(f, "{:?}", instruction)?
+		}
+		write!(f, "]|{};{{", self.cell_pointer)?;
 		for index in 0..SIZE {
 			if self.cells[index] != 0 {
 				write!(f, "({},{})", index, self.cells[index])?;
 			}
 		}
-		write!(f, "]>")
+		write!(f, "}}>")
 	}
 }
 
@@ -98,7 +104,7 @@ pub enum MachineError {
 	Unknown
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Command {
 	IncrementPointer,
 	DecrementPointer,
@@ -112,11 +118,12 @@ mod tests {
 
 	#[test]
 	fn execute_instruction() {
+		let instructions = [Command::IncrementPointer, Command::DecrementPointer, Command::Increment, Command::Decrement];
 		for (instruction, expected_machine) in vec![
-			(Command::IncrementPointer, BuildMachine::with(&[]).pointer_at(1).build()),
-			(Command::DecrementPointer, BuildMachine::with(&[]).pointer_at(SIZE - 1).build()),
-			(Command::Increment, BuildMachine::with(&[]).cell(0, 1).build()),
-			(Command::Decrement, BuildMachine::with(&[]).cell(0, u8::max_value()).build()),
+			(Command::IncrementPointer, BuildMachine::with(&instructions[0..1]).pointer_at(1).build()),
+			(Command::DecrementPointer, BuildMachine::with(&instructions[1..2]).pointer_at(SIZE - 1).build()),
+			(Command::Increment, BuildMachine::with(&instructions[2..3]).cell(0, 1).build()),
+			(Command::Decrement, BuildMachine::with(&instructions[3..4]).cell(0, u8::max_value()).build()),
 		] {
 			let instructions = [instruction];
 			let mut machine = Machine::new(&instructions);
