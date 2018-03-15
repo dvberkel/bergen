@@ -226,47 +226,34 @@ mod tests {
 	#[test]
 	fn jumping_should_work_correctly() {
 		let instructions = [Command::Increment, Command::Increment, Command::JumpAhead, Command::Decrement, Command::JumpBack];
-		let mut machine0 = Machine::new(&instructions);
+		let mut machine = Machine::new(&instructions);
 
-		if let Ok(machine1) = machine0.execute() {
-			assert_eq!(machine1, BuildMachine::with(&instructions).instruction_pointer_at(1).cell(0, 1).build());
-			if let Ok(machine2) = machine1.execute() {
-				assert_eq!(machine2, BuildMachine::with(&instructions).instruction_pointer_at(2).cell(0, 2).build());
-				if let Ok(machine3) = machine2.execute() {
-					assert_eq!(machine3, BuildMachine::with(&instructions).instruction_pointer_at(3).cell(0, 2).build());
-					if let Ok(machine4) = machine3.execute() {
-						assert_eq!(machine4, BuildMachine::with(&instructions).instruction_pointer_at(4).cell(0, 1).build());
-						if let Ok(machine5) = machine4.execute() {
-							assert_eq!(machine5, BuildMachine::with(&instructions).instruction_pointer_at(2).cell(0, 1).build());
-							if let Ok(machine6) = machine5.execute() {
-								assert_eq!(machine6, BuildMachine::with(&instructions).instruction_pointer_at(3).cell(0, 1).build());
-								if let Ok(machine7) = machine6.execute() {
-									assert_eq!(machine7, BuildMachine::with(&instructions).instruction_pointer_at(4).build());
-									if let Ok(machine8) = machine7.execute() {
-										assert_eq!(machine8, BuildMachine::with(&instructions).instruction_pointer_at(5).build());
-									} else {
-										assert!(false)
-									}
-								} else {
-									assert!(false)
-								}
-							} else {
-								assert!(false)
-							}
-						} else {
-							assert!(false)
-						}
-					} else {
-						assert!(false)
-					}
-				} else {
-					assert!(false)
-				}
-			} else {
-				assert!(false)
-			}
+		if let Ok(result_machine) = machine.execute()
+			.and_then(|machine| {
+				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(1).cell(0, 1).build());
+				machine.execute()
+			}).and_then(|machine| {
+				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(2).cell(0, 2).build());
+				machine.execute()
+			}).and_then(|machine| {
+				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(3).cell(0, 2).build());
+				machine.execute()
+			}).and_then(|machine| {
+				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(4).cell(0, 1).build());
+				machine.execute()
+			}).and_then(|machine| {
+				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(2).cell(0, 1).build());
+				machine.execute()
+			}).and_then(|machine| {
+				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(3).cell(0, 1).build());
+				machine.execute()
+			}).and_then(|machine| {
+				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(4).build());
+				machine.execute()
+			}) {
+			assert_eq!(result_machine, BuildMachine::with(&instructions).instruction_pointer_at(5).build());
 		} else {
-			assert!(false)
+			assert!(false);
 		}
 	}
 } 
