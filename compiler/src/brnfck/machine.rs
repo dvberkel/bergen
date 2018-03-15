@@ -48,43 +48,72 @@ impl<'a> Machine<'a> {
 		let command = self.instructions[self.instruction_pointer];
 		match command {
 			Command::IncrementPointer => {
-				self.instruction_pointer += 1;
-				self.cell_pointer = if self.cell_pointer  < SIZE - 1 { self.cell_pointer + 1 } else { 0 }; 
+				if self.cell_pointer != SIZE - 1 {
+					self.instruction_pointer += 1;
+					self.cell_pointer += 1;
+					Ok(self)
+				} else {
+					Err(MachineError::PointerIncrementOutOfBound)
+				}
 			}
 			Command::DecrementPointer => {
-				self.instruction_pointer += 1;
-				self.cell_pointer = if self.cell_pointer != 0 { self.cell_pointer - 1 } else { SIZE - 1 }; 
+				if self.cell_pointer != 0 {
+					self.instruction_pointer += 1;
+					self.cell_pointer -= 1;
+					Ok(self)
+				} else {
+					Err(MachineError::PointerDecrementOutOfBound)
+				}
 			}
 			Command::Increment => {
-				self.instruction_pointer += 1;
 				let current_value = self.cells[self.cell_pointer];
-				let value = if current_value != u8::max_value() { current_value + 1 } else { u8::min_value() };
-				self.cells[self.cell_pointer] = value;
+				if current_value != u8::max_value() {
+					self.instruction_pointer += 1;
+					self.cells[self.cell_pointer] += 1;
+					Ok(self)
+				} else {
+					Err(MachineError::CellOverflow)
+				}
 			}
 			Command::Decrement => {
-				self.instruction_pointer += 1;
 				let current_value = self.cells[self.cell_pointer];
-				let value = if current_value != u8::min_value() { current_value - 1 } else { u8::max_value() };
-				self.cells[self.cell_pointer] = value;
+				if current_value != u8::min_value() {
+					self.instruction_pointer += 1;
+					self.cells[self.cell_pointer] -= 1;
+					Ok(self)
+				} else {
+					Err(MachineError::CellUnderflow)
+				}
 			}
 			Command::JumpAhead => {
 				let current_value = self.cells[self.cell_pointer];
-				self.instruction_pointer = if current_value == 0 {
-					self.jump_back_index(self.instruction_pointer).unwrap() /* TODO correctly handle None */
+				if current_value == 0 {
+					if let Some(index) = self.jump_back_index(self.instruction_pointer) {
+						self.instruction_pointer = index + 1;
+						Ok(self)
+					} else {
+						Err(MachineError::UnmatchedJumpAhead)
+					}
 				} else {
-					self.instruction_pointer + 1
+					self.instruction_pointer += 1;
+					Ok(self)
 				}
 			}
 			Command::JumpBack => {
 				let current_value = self.cells[self.cell_pointer];
-				self.instruction_pointer = if current_value != 0 {
-					self.jump_ahead_index(self.instruction_pointer).unwrap() /* TODO correctly handle None */
+				if current_value != 0 {
+					if let Some(index) = self.jump_ahead_index(self.instruction_pointer) {
+						self.instruction_pointer = index + 1;
+						Ok(self)
+					} else {
+						Err(MachineError::UnmatchedJumpBack)
+					}
 				} else {
-					self.instruction_pointer + 1
+					self.instruction_pointer += 1;
+					Ok(self)
 				}
 			}
 		}
-		Ok(self)
 	}
 
 	fn jump_back_index(&self, start_index: usize) -> Option<usize> {
@@ -107,9 +136,9 @@ impl<'a> Machine<'a> {
 
 	fn jump_ahead_index(&self, start_index: usize) -> Option<usize> {
 		let mut closings = 1;
-		let mut index = start_index - 1;
+		let mut index: isize = start_index as isize - 1;
 		while index >= 0 && closings != 0 {
-			match self.instructions[index] {
+			match self.instructions[index as usize] {
 				Command::JumpAhead => closings -= 1,
 				Command::JumpBack  => closings += 1,
 				_ => {/* do nothing */},
@@ -117,7 +146,7 @@ impl<'a> Machine<'a> {
 			index -= 1
 		}
 		if index >= 0 && closings == 0 {
-			Some(index + 1)
+			Some(index as usize + 1)
 		} else {
 			None
 		}
@@ -149,9 +178,9 @@ impl<'a> Debug for Machine<'a> {
 	fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
 		write!(f, "<{}:[", self.instruction_pointer)?;
 		for instruction in self.instructions {
-			write!(f, "{:?}", instruction)?;
+			write!(f, " {:?}", instruction)?;
 		}
-		write!(f, "]|{};{{", self.cell_pointer)?;
+		write!(f, " ]|{};{{", self.cell_pointer)?;
 		for index in 0..SIZE {
 			if self.cells[index] != 0 {
 				write!(f, "({},{})", index, self.cells[index])?;
@@ -161,8 +190,14 @@ impl<'a> Debug for Machine<'a> {
 	}
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum MachineError {
-	Unknown
+	PointerIncrementOutOfBound,
+	PointerDecrementOutOfBound,
+	CellOverflow,
+	CellUnderflow,
+	UnmatchedJumpAhead,
+	UnmatchedJumpBack,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -180,13 +215,11 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn execute_instruction() {
+	fn execute_instruction_will_result_in_a_machine() {
 		let instructions = [Command::IncrementPointer, Command::DecrementPointer, Command::Increment, Command::Decrement];
 		for (instruction, expected_machine) in vec![
 			(Command::IncrementPointer, BuildMachine::with(&instructions[0..1]).instruction_pointer_at(1).cell_pointer_at(1).build()),
-			(Command::DecrementPointer, BuildMachine::with(&instructions[1..2]).instruction_pointer_at(1).cell_pointer_at(SIZE - 1).build()),
 			(Command::Increment, BuildMachine::with(&instructions[2..3]).instruction_pointer_at(1).cell(0, 1).build()),
-			(Command::Decrement, BuildMachine::with(&instructions[3..4]).instruction_pointer_at(1).cell(0, u8::max_value()).build()),
 		] {
 			let instructions = [instruction];
 			let mut machine = Machine::new(&instructions);
@@ -200,24 +233,66 @@ mod tests {
 	}
 
 	#[test]
-	fn increment_pointer_wraps_around() {
+	fn execute_instruction_will_result_in_an_error() {
+		let instructions = [Command::IncrementPointer, Command::DecrementPointer, Command::Increment, Command::Decrement];
+		for (instruction, expected_error) in vec![
+			(Command::DecrementPointer, MachineError::PointerDecrementOutOfBound),
+			(Command::Decrement, MachineError::CellUnderflow),
+		] {
+			let instructions = [instruction];
+			let mut machine = Machine::new(&instructions);
+
+			if let Err(result_error) = machine.execute() {
+				assert_eq!(result_error, expected_error);
+			} else {
+				assert!(false);
+			}
+		}
+	}
+
+	#[test]
+	fn increment_pointer_should_error_when_on_boundary() {
 		let instructions = [Command::IncrementPointer];			
 		let mut machine = BuildMachine::with(&instructions).cell_pointer_at(SIZE - 1).build();
 
-		if let Ok(result_machine) = machine.execute() {
-			assert_eq!(result_machine, BuildMachine::with(&instructions).instruction_pointer_at(1).cell_pointer_at(0).build());
+		if let Err(result_error) = machine.execute() {
+			assert_eq!(result_error, MachineError::PointerIncrementOutOfBound);
 		} else {
 			assert!(false);
 		}
 	}
 
 	#[test]
-	fn increment_wraps_around() {
+	fn increment_should_error_when_on_around() {
 		let instructions = [Command::Increment];			
 		let mut machine = BuildMachine::with(&instructions).cell(0, u8::max_value()).build();
 
-		if let Ok(result_machine) = machine.execute() {
-			assert_eq!(result_machine, BuildMachine::with(&instructions).instruction_pointer_at(1).cell(0,0).build());
+		if let Err(result_error) = machine.execute() {
+			assert_eq!(result_error, MachineError::CellOverflow);
+		} else {
+			assert!(false);
+		}
+	}
+	
+	#[test]
+	fn jump_ahead_should_error_when_missing_jump_back() {
+		let instructions = [Command::JumpAhead];			
+		let mut machine = Machine::new(&instructions);
+
+		if let Err(result_error) = machine.execute() {
+			assert_eq!(result_error, MachineError::UnmatchedJumpAhead);
+		} else {
+			assert!(false);
+		}
+	}
+	
+	#[test]
+	fn jump_back_should_error_when_missing_jump_ahead() {
+		let instructions = [Command::JumpBack];			
+		let mut machine = BuildMachine::with(&instructions).cell(0, 1).build();
+
+		if let Err(result_error) = machine.execute() {
+			assert_eq!(result_error, MachineError::UnmatchedJumpBack);
 		} else {
 			assert!(false);
 		}
@@ -240,9 +315,6 @@ mod tests {
 				machine.execute()
 			}).and_then(|machine| {
 				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(4).cell(0, 1).build());
-				machine.execute()
-			}).and_then(|machine| {
-				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(2).cell(0, 1).build());
 				machine.execute()
 			}).and_then(|machine| {
 				assert_eq!(machine, BuildMachine::with(&instructions).instruction_pointer_at(3).cell(0, 1).build());
