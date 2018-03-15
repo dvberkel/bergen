@@ -67,8 +67,60 @@ impl<'a> Machine<'a> {
 				let value = if current_value != u8::min_value() { current_value - 1 } else { u8::max_value() };
 				self.cells[self.cell_pointer] = value;
 			}
+			Command::JumpAhead => {
+				let current_value = self.cells[self.cell_pointer];
+				self.instruction_pointer = if current_value == 0 {
+					self.jump_back_index(self.instruction_pointer).unwrap() /* TODO correctly handle None */
+				} else {
+					self.instruction_pointer + 1
+				}
+			}
+			Command::JumpBack => {
+				let current_value = self.cells[self.cell_pointer];
+				self.instruction_pointer = if current_value != 0 {
+					self.jump_ahead_index(self.instruction_pointer).unwrap() /* TODO correctly handle None */
+				} else {
+					self.instruction_pointer + 1
+				}
+			}
 		}
 		Ok(self)
+	}
+
+	fn jump_back_index(&self, start_index: usize) -> Option<usize> {
+		let mut openings = 1;
+		let mut index = start_index + 1;
+		while index < self.instructions.len() && openings != 0 {
+			match self.instructions[index] {
+				Command::JumpAhead => openings += 1,
+				Command::JumpBack  => openings -= 1,
+				_ => {/* do nothing */},
+			}
+			index += 1
+		}
+		if index <= self.instructions.len() && openings == 0 {
+			Some(index - 1)
+		} else {
+			None
+		}
+	}
+
+	fn jump_ahead_index(&self, start_index: usize) -> Option<usize> {
+		let mut closings = 1;
+		let mut index = start_index - 1;
+		while index >= 0 && closings != 0 {
+			match self.instructions[index] {
+				Command::JumpAhead => closings -= 1,
+				Command::JumpBack  => closings += 1,
+				_ => {/* do nothing */},
+			}
+			index -= 1
+		}
+		if index >= 0 && closings == 0 {
+			Some(index + 1)
+		} else {
+			None
+		}
 	}
 }
 
@@ -95,9 +147,9 @@ impl<'a> Eq for Machine<'a> {}
 
 impl<'a> Debug for Machine<'a> {
 	fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
-		write!(f, "<{}:[", self.instruction_pointer);
+		write!(f, "<{}:[", self.instruction_pointer)?;
 		for instruction in self.instructions {
-			write!(f, "{:?}", instruction)?
+			write!(f, "{:?}", instruction)?;
 		}
 		write!(f, "]|{};{{", self.cell_pointer)?;
 		for index in 0..SIZE {
@@ -119,6 +171,8 @@ pub enum Command {
 	DecrementPointer,
 	Increment,
 	Decrement,
+	JumpAhead,
+	JumpBack,
 }
 
 #[cfg(test)]
@@ -166,6 +220,53 @@ mod tests {
 			assert_eq!(result_machine, BuildMachine::with(&instructions).instruction_pointer_at(1).cell(0,0).build());
 		} else {
 			assert!(false);
+		}
+	}
+
+	#[test]
+	fn jumping_should_work_correctly() {
+		let instructions = [Command::Increment, Command::Increment, Command::JumpAhead, Command::Decrement, Command::JumpBack];
+		let mut machine0 = Machine::new(&instructions);
+
+		if let Ok(machine1) = machine0.execute() {
+			assert_eq!(machine1, BuildMachine::with(&instructions).instruction_pointer_at(1).cell(0, 1).build());
+			if let Ok(machine2) = machine1.execute() {
+				assert_eq!(machine2, BuildMachine::with(&instructions).instruction_pointer_at(2).cell(0, 2).build());
+				if let Ok(machine3) = machine2.execute() {
+					assert_eq!(machine3, BuildMachine::with(&instructions).instruction_pointer_at(3).cell(0, 2).build());
+					if let Ok(machine4) = machine3.execute() {
+						assert_eq!(machine4, BuildMachine::with(&instructions).instruction_pointer_at(4).cell(0, 1).build());
+						if let Ok(machine5) = machine4.execute() {
+							assert_eq!(machine5, BuildMachine::with(&instructions).instruction_pointer_at(2).cell(0, 1).build());
+							if let Ok(machine6) = machine5.execute() {
+								assert_eq!(machine6, BuildMachine::with(&instructions).instruction_pointer_at(3).cell(0, 1).build());
+								if let Ok(machine7) = machine6.execute() {
+									assert_eq!(machine7, BuildMachine::with(&instructions).instruction_pointer_at(4).build());
+									if let Ok(machine8) = machine7.execute() {
+										assert_eq!(machine8, BuildMachine::with(&instructions).instruction_pointer_at(5).build());
+									} else {
+										assert!(false)
+									}
+								} else {
+									assert!(false)
+								}
+							} else {
+								assert!(false)
+							}
+						} else {
+							assert!(false)
+						}
+					} else {
+						assert!(false)
+					}
+				} else {
+					assert!(false)
+				}
+			} else {
+				assert!(false)
+			}
+		} else {
+			assert!(false)
 		}
 	}
 } 
