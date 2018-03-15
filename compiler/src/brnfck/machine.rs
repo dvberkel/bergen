@@ -65,17 +65,20 @@ impl<'a> Machine<'a> {
 
 impl<'a> PartialEq for Machine<'a> {
 	fn eq(&self, rhs: &Self) -> bool {
-		if self.cell_pointer.eq(&rhs.cell_pointer) {
-			let mut index = 0;
-			while index < SIZE && self.cells[index].eq(&rhs.cells[index]) {
-				index += 1;
-			}
-			index == SIZE
-		} else {
-			false
-		}
+		if self.cell_pointer != rhs.cell_pointer { return false; }
+		if !same_cells(&self.cells, &rhs.cells) { return false; }
+		true
 	}
 }
+
+fn same_cells(lhs: &[u8;SIZE], rhs: &[u8;SIZE]) -> bool {
+	let mut index = 0;
+	while index < SIZE && lhs[index] == rhs[index] {
+		index += 1;
+	}
+	index == SIZE
+}
+
 
 impl<'a> Eq for Machine<'a> {}
 
