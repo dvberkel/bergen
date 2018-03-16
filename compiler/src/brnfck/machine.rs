@@ -14,6 +14,10 @@ impl<'a> Machine<'a> {
 		Machine { instruction_pointer: 0, instructions: instructions, cell_pointer: 0, cells : [0;SIZE] }
 	}
 
+	pub fn halted(&self) -> bool {
+		self.instructions.len() <= self.instruction_pointer
+	}
+
 	pub fn execute(mut self) -> Result<Machine<'a>, MachineError> {
 		let command = self.instructions[self.instruction_pointer];
 		match command {
@@ -327,5 +331,21 @@ mod tests {
 		} else {
 			assert!(false);
 		}
+	}
+
+	#[test]
+	fn machine_should_not_have_halted_when_there_are_instructions_left() {
+		let instructions = [Command::Increment, Command::Increment, Command::JumpAhead, Command::Decrement, Command::JumpBack];
+		let machine = BuildMachine::with(&instructions).build();
+
+		assert!(!machine.halted());
+	}
+
+	#[test]
+	fn machine_should_have_halted_when_there_are_no_instructions_left() {
+		let instructions = [Command::Increment, Command::Increment, Command::JumpAhead, Command::Decrement, Command::JumpBack];
+		let machine = BuildMachine::with(&instructions).instruction_pointer_at(5).build();
+
+		assert!(machine.halted());
 	}
 } 
