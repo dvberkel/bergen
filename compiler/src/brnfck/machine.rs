@@ -235,13 +235,12 @@ mod tests {
 
 	#[test]
 	fn execute_instruction_will_result_in_an_error() {
-		let instructions = [Command::IncrementPointer, Command::DecrementPointer, Command::Increment, Command::Decrement];
 		for (instruction, expected_error) in vec![
 			(Command::DecrementPointer, MachineError::PointerDecrementOutOfBound),
 			(Command::Decrement, MachineError::CellUnderflow),
 		] {
 			let instructions = [instruction];
-			let mut machine = Machine::new(&instructions);
+			let machine = Machine::new(&instructions);
 
 			if let Err(result_error) = machine.execute() {
 				assert_eq!(result_error, expected_error);
@@ -254,7 +253,7 @@ mod tests {
 	#[test]
 	fn increment_pointer_should_error_when_on_boundary() {
 		let instructions = [Command::IncrementPointer];			
-		let mut machine = BuildMachine::with(&instructions).cell_pointer_at(SIZE - 1).build();
+		let machine = BuildMachine::with(&instructions).cell_pointer_at(SIZE - 1).build();
 
 		if let Err(result_error) = machine.execute() {
 			assert_eq!(result_error, MachineError::PointerIncrementOutOfBound);
@@ -266,7 +265,7 @@ mod tests {
 	#[test]
 	fn increment_should_error_when_on_around() {
 		let instructions = [Command::Increment];			
-		let mut machine = BuildMachine::with(&instructions).cell(0, u8::max_value()).build();
+		let machine = BuildMachine::with(&instructions).cell(0, u8::max_value()).build();
 
 		if let Err(result_error) = machine.execute() {
 			assert_eq!(result_error, MachineError::CellOverflow);
@@ -278,7 +277,7 @@ mod tests {
 	#[test]
 	fn jump_ahead_should_error_when_missing_jump_back() {
 		let instructions = [Command::JumpAhead];			
-		let mut machine = Machine::new(&instructions);
+		let machine = Machine::new(&instructions);
 
 		if let Err(result_error) = machine.execute() {
 			assert_eq!(result_error, MachineError::UnmatchedJumpAhead);
@@ -290,7 +289,7 @@ mod tests {
 	#[test]
 	fn jump_back_should_error_when_missing_jump_ahead() {
 		let instructions = [Command::JumpBack];			
-		let mut machine = BuildMachine::with(&instructions).cell(0, 1).build();
+		let machine = BuildMachine::with(&instructions).cell(0, 1).build();
 
 		if let Err(result_error) = machine.execute() {
 			assert_eq!(result_error, MachineError::UnmatchedJumpBack);
@@ -302,7 +301,7 @@ mod tests {
 	#[test]
 	fn jumping_should_work_correctly() {
 		let instructions = [Command::Increment, Command::Increment, Command::JumpAhead, Command::Decrement, Command::JumpBack];
-		let mut machine = Machine::new(&instructions);
+		let machine = Machine::new(&instructions);
 
 		if let Ok(result_machine) = machine.execute()
 			.and_then(|machine| {
