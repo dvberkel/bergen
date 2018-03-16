@@ -1,4 +1,4 @@
-use std::io::{Read};
+use std::io::{Read, Write};
 
 #[test]
 fn read_from_buffer() {
@@ -19,4 +19,19 @@ fn read_from_buffer() {
 	} else {
 		assert!(false);
 	}
+}
+
+#[test]
+fn write_to_buffer() {
+	let bytes: [u8;3] = [97, 98, 99];
+	let mut buffer: [u8;1];
+	let mut output: Vec<u8> = vec!();
+
+	for byte in bytes.iter() {
+		buffer = [*byte];
+		let result = output.write(&buffer);
+		assert!(result.is_ok());
+		assert_eq!(result.unwrap(), 1);
+	}
+	assert_eq!(output, vec!(97, 98, 99));
 }
