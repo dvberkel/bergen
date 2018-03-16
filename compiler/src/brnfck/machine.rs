@@ -2,36 +2,6 @@ use std::fmt::{self, Debug, Formatter};
 
 const SIZE: usize = 30_000;
 
-struct BuildMachine<'a> {
-	instruction_pointer: usize,
-	instructions: &'a [Command],
-	cell_pointer: usize,
-	cells: [u8; SIZE],	
-}
-
-impl<'a> BuildMachine<'a> {
-	fn with(instructions: &'a[Command]) -> Self {
-		BuildMachine { instruction_pointer:0, instructions, cell_pointer: 0, cells: [0; SIZE] }
-	}
-
-	fn instruction_pointer_at(self, instruction_pointer: usize) -> Self {
-		BuildMachine { instruction_pointer, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
-	}
-
-	fn cell_pointer_at(self, cell_pointer: usize) -> Self {
-		BuildMachine { instruction_pointer: self.instruction_pointer, instructions: self.instructions, cell_pointer, cells: self.cells }
-	}
-
-	fn cell(mut self, index: usize, value: u8) -> Self {
-		self.cells[index] = value;
-		BuildMachine { instruction_pointer: self.instruction_pointer, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
-	}
-
-	fn build(self) -> Machine<'a> {
-		Machine { instruction_pointer: self.instruction_pointer, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
-	}
-}
-
 pub struct Machine<'a> {
 	instruction_pointer: usize,
 	instructions: &'a[Command],
@@ -213,6 +183,37 @@ pub enum Command {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	struct BuildMachine<'a> {
+		instruction_pointer: usize,
+		instructions: &'a [Command],
+		cell_pointer: usize,
+		cells: [u8; SIZE],	
+	}
+
+	impl<'a> BuildMachine<'a> {
+		fn with(instructions: &'a[Command]) -> Self {
+			BuildMachine { instruction_pointer:0, instructions, cell_pointer: 0, cells: [0; SIZE] }
+		}
+
+		fn instruction_pointer_at(self, instruction_pointer: usize) -> Self {
+			BuildMachine { instruction_pointer, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
+		}
+
+		fn cell_pointer_at(self, cell_pointer: usize) -> Self {
+			BuildMachine { instruction_pointer: self.instruction_pointer, instructions: self.instructions, cell_pointer, cells: self.cells }
+		}
+
+		fn cell(mut self, index: usize, value: u8) -> Self {
+			self.cells[index] = value;
+			BuildMachine { instruction_pointer: self.instruction_pointer, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
+		}
+
+		fn build(self) -> Machine<'a> {
+			Machine { instruction_pointer: self.instruction_pointer, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
+		}
+	}
+
 
 	#[test]
 	fn execute_instruction_will_result_in_a_machine() {
