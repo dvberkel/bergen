@@ -91,6 +91,22 @@ impl<'a, I, O> Machine<'a, I, O> where I: Read, O: Write {
 					Ok(self)
 				}
 			}
+			Command::Read => {
+				if self.input.is_some() {
+					self.instruction_pointer += 1;
+					Ok(self)
+				} else {
+					Err(MachineError::NoInput)
+				}
+			}
+			Command::Write => {
+				if self.output.is_some() {
+					self.instruction_pointer += 1;
+					Ok(self)
+				} else {
+					Err(MachineError::NoOutput)
+				}
+			}
 		}
 	}
 
@@ -176,6 +192,8 @@ pub enum MachineError {
 	CellUnderflow,
 	UnmatchedJumpAhead,
 	UnmatchedJumpBack,
+	NoInput,
+	NoOutput,	
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -186,6 +204,8 @@ pub enum Command {
 	Decrement,
 	JumpAhead,
 	JumpBack,
+	Read,
+	Write,
 }
 
 #[cfg(test)]
@@ -253,6 +273,8 @@ mod tests {
 		for (instruction, expected_error) in vec![
 			(Command::DecrementPointer, MachineError::PointerDecrementOutOfBound),
 			(Command::Decrement, MachineError::CellUnderflow),
+			(Command::Read, MachineError::NoInput),
+			(Command::Write, MachineError::NoOutput),
 		] {
 			let instructions = [instruction];
 			let machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
