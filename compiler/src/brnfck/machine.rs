@@ -1,24 +1,28 @@
+use std::io::{Read, Write};
+use std::cell::RefCell;
 use std::fmt::{self, Debug, Formatter};
 
 const SIZE: usize = 30_000;
 
-pub struct Machine<'a> {
+pub struct Machine<'a, I: 'a, O: 'a> where I: Read, O: Write {
+	input: Option<RefCell<&'a I>>,
+	output: Option<RefCell<&'a O>>,
 	instruction_pointer: usize,
 	instructions: &'a[Command],
 	cell_pointer: usize,
 	cells: [u8; SIZE],
 }
 
-impl<'a> Machine<'a> {
-	pub fn new(instructions: &'a[Command]) -> Machine<'a> {
-		Machine { instruction_pointer: 0, instructions: instructions, cell_pointer: 0, cells : [0;SIZE] }
+impl<'a, I, O> Machine<'a, I, O> where I: Read, O: Write {
+	pub fn new(instructions: &'a[Command]) -> Machine<'a, I, O> {
+		Machine { input: None, output: None, instruction_pointer: 0, instructions: instructions, cell_pointer: 0, cells : [0;SIZE] }
 	}
 
 	pub fn halted(&self) -> bool {
 		self.instructions.len() <= self.instruction_pointer
 	}
 
-	pub fn execute(mut self) -> Result<Machine<'a>, MachineError> {
+	pub fn execute(mut self) -> Result<Machine<'a, I, O>, MachineError> {
 		let command = self.instructions[self.instruction_pointer];
 		match command {
 			Command::IncrementPointer => {
@@ -127,7 +131,7 @@ impl<'a> Machine<'a> {
 	}
 }
 
-impl<'a> PartialEq for Machine<'a> {
+impl<'a, I, O> PartialEq for Machine<'a, I, O> where I: Read, O: Write {
 	fn eq(&self, rhs: &Self) -> bool {
 		if self.instruction_pointer != rhs.instruction_pointer { return false; }
 		if self.instructions != rhs.instructions { return false; }
@@ -146,9 +150,9 @@ fn same_cells(lhs: &[u8;SIZE], rhs: &[u8;SIZE]) -> bool {
 }
 
 
-impl<'a> Eq for Machine<'a> {}
+impl<'a, I, O> Eq for Machine<'a, I, O> where I: Read, O: Write {}
 
-impl<'a> Debug for Machine<'a> {
+impl<'a, I, O> Debug for Machine<'a, I, O>  where I: Read, O: Write{
 	fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
 		write!(f, "<{}:[", self.instruction_pointer)?;
 		for instruction in self.instructions {
@@ -213,27 +217,34 @@ mod tests {
 			BuildMachine { instruction_pointer: self.instruction_pointer, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
 		}
 
-		fn build(self) -> Machine<'a> {
-			Machine { instruction_pointer: self.instruction_pointer, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
+		fn build(self) -> Machine<'a, &'a [u8], Vec<u8>> {
+			Machine { input: None, output: None, instruction_pointer: self.instruction_pointer, instructions: self.instructions, cell_pointer: self.cell_pointer, cells: self.cells }
 		}
 	}
 
+	#[test]
+	fn execute_increment_pointer_will_result_in_a_machine() {
+		let instructions = [Command::IncrementPointer];
+		let expected_machine = BuildMachine::with(&instructions).instruction_pointer_at(1).cell_pointer_at(1).build();
+		let mut machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
+
+		if let Ok(result_machine) = machine.execute() {
+			assert_eq!(result_machine, expected_machine);
+		} else {
+			assert!(false);
+		}
+	}
 
 	#[test]
-	fn execute_instruction_will_result_in_a_machine() {
-		let instructions = [Command::IncrementPointer, Command::DecrementPointer, Command::Increment, Command::Decrement];
-		for (instruction, expected_machine) in vec![
-			(Command::IncrementPointer, BuildMachine::with(&instructions[0..1]).instruction_pointer_at(1).cell_pointer_at(1).build()),
-			(Command::Increment, BuildMachine::with(&instructions[2..3]).instruction_pointer_at(1).cell(0, 1).build()),
-		] {
-			let instructions = [instruction];
-			let mut machine = Machine::new(&instructions);
+	fn execute_increment_will_result_in_a_machine() {
+		let instructions = [Command::Increment];
+		let expected_machine = BuildMachine::with(&instructions).instruction_pointer_at(1).cell(0, 1).build();
+		let mut machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
 
-			if let Ok(result_machine) = machine.execute() {
-				assert_eq!(result_machine, expected_machine);
-			} else {
-				assert!(false);
-			}
+		if let Ok(result_machine) = machine.execute() {
+			assert_eq!(result_machine, expected_machine);
+		} else {
+			assert!(false);
 		}
 	}
 
@@ -244,7 +255,7 @@ mod tests {
 			(Command::Decrement, MachineError::CellUnderflow),
 		] {
 			let instructions = [instruction];
-			let machine = Machine::new(&instructions);
+			let machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
 
 			if let Err(result_error) = machine.execute() {
 				assert_eq!(result_error, expected_error);
@@ -281,7 +292,7 @@ mod tests {
 	#[test]
 	fn jump_ahead_should_error_when_missing_jump_back() {
 		let instructions = [Command::JumpAhead];			
-		let machine = Machine::new(&instructions);
+		let machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
 
 		if let Err(result_error) = machine.execute() {
 			assert_eq!(result_error, MachineError::UnmatchedJumpAhead);
@@ -305,7 +316,7 @@ mod tests {
 	#[test]
 	fn jumping_should_work_correctly() {
 		let instructions = [Command::Increment, Command::Increment, Command::JumpAhead, Command::Decrement, Command::JumpBack];
-		let machine = Machine::new(&instructions);
+		let machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
 
 		if let Ok(result_machine) = machine.execute()
 			.and_then(|machine| {

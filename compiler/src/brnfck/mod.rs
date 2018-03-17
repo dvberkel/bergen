@@ -3,7 +3,7 @@ mod machine;
 pub use self::machine::Command;
 
 pub fn run(instructions: &[machine::Command]) -> Result<(), machine::MachineError> {
-	let mut machine = machine::Machine::new(instructions);
+	let mut machine: machine::Machine<&[u8], Vec<u8>> = machine::Machine::new(instructions);
 
 	while !machine.halted() {
 		match machine.execute() {
