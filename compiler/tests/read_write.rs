@@ -22,16 +22,19 @@ fn read_from_buffer() {
 }
 
 #[test]
-fn write_to_buffer() {
+fn write_to_vec() {
 	let bytes: [u8;3] = [97, 98, 99];
 	let mut buffer: [u8;1];
 	let mut output: Vec<u8> = vec!();
+	{
+		let output_ref = &mut output;
 
-	for byte in bytes.iter() {
-		buffer = [*byte];
-		let result = output.write(&buffer);
-		assert!(result.is_ok());
-		assert_eq!(result.unwrap(), 1);
+		for byte in bytes.iter() {
+			buffer = [*byte];
+			let result = output_ref.write(&buffer);
+			assert!(result.is_ok());
+			assert_eq!(result.unwrap(), 1);
+		}
 	}
 	assert_eq!(output, vec!(97, 98, 99));
 }
