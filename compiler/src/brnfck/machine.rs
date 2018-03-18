@@ -133,6 +133,17 @@ impl<'a, I, O> Machine<'a, I, O> where I: Read, O: Write {
 		}
 	}
 
+	pub fn run(mut self) -> Result<(), MachineError> {
+		while !self.halted() {
+			match self.execute() {
+				Ok(next_machine) => { self = next_machine; },
+
+				Err(error) => { return Err(error); },
+			}
+		}
+		Ok(())
+	}
+
 	fn jump_back_index(&self, start_index: usize) -> Option<usize> {
 		let mut openings = 1;
 		let mut index = start_index + 1;
