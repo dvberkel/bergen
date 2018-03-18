@@ -92,25 +92,22 @@ impl<'a, I, O> Machine<'a, I, O> where I: Read, O: Write {
 				}
 			}
 			Command::Read => {
-				if self.input.is_some() {
-					self.instruction_pointer += 1;
-					{
-						let mut input = self.input.as_mut().unwrap();
-						let mut bytes: [u8;1] = [0;1];
-						if let Ok(size) = (*input).read(&mut bytes) {
-							if size == 1 {
-								self.cells[self.cell_pointer] = bytes[0];
-							} else {
-								return Err(MachineError::NoByteRead)
-							}
+				if self.input.is_none() { return Err(MachineError::NoInput); }
+				self.instruction_pointer += 1;
+				{
+					let mut input = self.input.as_mut().unwrap();
+					let mut bytes: [u8;1] = [0;1];
+					if let Ok(size) = (*input).read(&mut bytes) {
+						if size == 1 {
+							self.cells[self.cell_pointer] = bytes[0];
 						} else {
-							return Err(MachineError::InputError)
+							return Err(MachineError::NoByteRead)
 						}
+					} else {
+						return Err(MachineError::InputError)
 					}
-					Ok(self)
-				} else {
-					Err(MachineError::NoInput)
 				}
+				Ok(self)
 			}
 			Command::Write => {
 				if self.output.is_some() {
