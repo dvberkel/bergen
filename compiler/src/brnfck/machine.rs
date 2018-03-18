@@ -5,8 +5,8 @@ use std::fmt::{self, Debug, Formatter};
 const SIZE: usize = 30_000;
 
 pub struct Machine<'a, I: 'a, O: 'a> where I: Read, O: Write {
-	input: Option<RefCell<&'a I>>,
-	output: Option<RefCell<&'a O>>,
+	input: Option<Box<I>>,
+	output: Option<Box<O>>,
 	instruction_pointer: usize,
 	instructions: &'a[Command],
 	cell_pointer: usize,
