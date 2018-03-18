@@ -17,6 +17,10 @@ impl<'a, I, O> Machine<'a, I, O> where I: Read, O: Write {
 	pub fn new(instructions: &'a[Command]) -> Machine<'a, I, O> {
 		Machine { input: None, output: None, instruction_pointer: 0, instructions: instructions, cell_pointer: 0, cells : [0;SIZE] }
 	}
+	
+	pub fn io(instructions: &'a[Command], input: Box<I>, output: Box<O>) -> Machine<'a, I, O> {
+		Machine { input: Some(input), output: Some(output), instruction_pointer: 0, instructions: instructions, cell_pointer: 0, cells : [0;SIZE] }
+	}
 
 	pub fn halted(&self) -> bool {
 		self.instructions.len() <= self.instruction_pointer
@@ -93,13 +97,13 @@ impl<'a, I, O> Machine<'a, I, O> where I: Read, O: Write {
 			}
 			Command::Read => {
 				if self.input.is_none() { return Err(MachineError::NoInput); }
-				self.instruction_pointer += 1;
 				{
 					let mut input = self.input.as_mut().unwrap();
-					let mut bytes: [u8;1] = [0;1];
-					if let Ok(size) = (*input).read(&mut bytes) {
+					let mut buffer: [u8;1] = [0;1];
+					if let Ok(size) = (*input).read(&mut buffer) {
 						if size == 1 {
-							self.cells[self.cell_pointer] = bytes[0];
+							self.instruction_pointer += 1;
+							self.cells[self.cell_pointer] = buffer[0];
 						} else {
 							return Err(MachineError::NoByteRead)
 						}
@@ -110,12 +114,21 @@ impl<'a, I, O> Machine<'a, I, O> where I: Read, O: Write {
 				Ok(self)
 			}
 			Command::Write => {
-				if self.output.is_some() {
-					self.instruction_pointer += 1;
-					Ok(self)
-				} else {
-					Err(MachineError::NoOutput)
+				if self.output.is_none() { return Err(MachineError::NoOutput); }
+				{
+					let buffer: [u8;1] = [self.cells[self.cell_pointer];1];
+					let mut output = self.output.as_mut().unwrap();
+					if let Ok(size) = (*output).write(&buffer) {
+						if size == 1 {
+							self.instruction_pointer += 1;
+						} else {
+							return Err(MachineError::NoByteWritten);
+						}
+					} else {
+						return Err(MachineError::OutputError);
+					}
 				}
+				Ok(self)
 			}
 		}
 	}
@@ -205,7 +218,9 @@ pub enum MachineError {
 	NoInput,
 	InputError,
 	NoByteRead,
-	NoOutput,	
+	NoOutput,
+	OutputError,
+	NoByteWritten,	
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
