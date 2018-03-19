@@ -1,2 +1,2 @@
-mod brnfck;
-mod parser;
+pub mod brnfck;
+pub mod parser;
