@@ -22,4 +22,19 @@ mod tests {
             assert!(false);
         }
     }
+
+    fn should_parse_empty_increment_pointer() {
+        let source: &[u8] =
+"
+  /\\  \
+ /  \\ \
+/    \\\
+".as_bytes();
+
+        if let Ok(instructions) = parse(source) {
+            assert_eq!(instructions.len(), 1);
+        } else {
+            assert!(false);
+        }
+    }
 }
