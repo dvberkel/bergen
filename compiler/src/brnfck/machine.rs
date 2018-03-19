@@ -283,7 +283,7 @@ mod tests {
 	fn execute_increment_pointer_will_result_in_a_machine() {
 		let instructions = [Command::IncrementPointer];
 		let expected_machine = BuildMachine::with(&instructions).instruction_pointer_at(1).cell_pointer_at(1).build();
-		let mut machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
+		let machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
 
 		if let Ok(result_machine) = machine.execute() {
 			assert_eq!(result_machine, expected_machine);
@@ -296,7 +296,7 @@ mod tests {
 	fn execute_increment_will_result_in_a_machine() {
 		let instructions = [Command::Increment];
 		let expected_machine = BuildMachine::with(&instructions).instruction_pointer_at(1).cell(0, 1).build();
-		let mut machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
+		let machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
 
 		if let Ok(result_machine) = machine.execute() {
 			assert_eq!(result_machine, expected_machine);
