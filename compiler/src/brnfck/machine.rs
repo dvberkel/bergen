@@ -1,5 +1,4 @@
 use std::io::{Read, Write};
-use std::cell::RefCell;
 use std::fmt::{self, Debug, Formatter};
 
 const SIZE: usize = 30_000;
