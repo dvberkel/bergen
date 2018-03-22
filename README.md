@@ -80,8 +80,8 @@ Mountain ranges our used to represent the different operators. Below you can fin
 ## Tools
 The following tools are being implemented.
 
-* `bergen`: a interperter.
-
+* `bergen`: a interpreter.
+* `bergenc`: a bergen to brainf\*ck compiler.
 
 [conference]: https://2018.boosterconf.no/
 [brainf*ck]: https://en.wikipedia.org/wiki/Brainfuck
