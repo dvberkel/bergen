@@ -31,8 +31,8 @@ fn rows(source: &[u8]) -> Result<(&[u8], &[u8], &[u8]), ParseError> {
     let third_index = index;
     if index < source.len() {
         Ok((&source[             0 .. first_index],
-         &source[ first_index+1 .. second_index],
-         &source[second_index+1 .. third_index]))
+            &source[ first_index+1 .. second_index],
+            &source[second_index+1 .. third_index]))
     } else {
         Err(ParseError::Unknown)
     }
