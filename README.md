@@ -77,6 +77,10 @@ Mountain ranges our used to represent the different operators. Below you can fin
 /        \
 ```
 
+### States
+The `bergen` parser can be in a few states while parsing input. Below we will
+show the states and the allowed transitions.
+
 ## Tools
 The following tools are being implemented.
 
