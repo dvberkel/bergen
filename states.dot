@@ -1,6 +1,6 @@
 digraph {
   node [shape=circle];
-  0 -> 1;
-  1 -> 2;
-  1 -> 3;
+  0 -> 1 [label="a"];
+  1 -> 2 [label="b"];
+  1 -> 3 [label="f"];
 }
