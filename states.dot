@@ -1,16 +1,16 @@
 digraph {
   node [shape=circle];
-  2 [shape=doublecircle];
-  8 [shape=doublecircle];
-  13 [shape=doublecircle];
-  17 [shape=doublecircle];
-  22 [shape=doublecircle];
-  24 [shape=doublecircle];
-  25 [shape=doublecircle];
-  27 [shape=doublecircle];
+  2 [shape=doublecircle,xlabel="."];
+  8 [shape=doublecircle,xlabel="+"];
+  13 [shape=doublecircle,xlabel=">"];
+  17 [shape=doublecircle,xlabel="-"];
+  22 [shape=doublecircle,xlabel="["];
+  24 [shape=doublecircle,xlabel="<"];
+  25 [shape=doublecircle,xlabel="]"];
+  27 [shape=doublecircle,xlabel=","];
   0 -> 1 [label="a"];
-  1 -> 2 [label="b"];
-  1 -> 3 [label="f"];
+  1 -> 2 [label="f"];
+  1 -> 3 [label="b"];
   3 -> 4 [label="c"];
   3 -> 5 [label="e"];
   4 -> 6 [label="d"];
