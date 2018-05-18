@@ -4,6 +4,9 @@ digraph {
   8 [shape=doublecircle];
   13 [shape=doublecircle];
   17 [shape=doublecircle];
+  22 [shape=doublecircle];
+  24 [shape=doublecircle];
+  25 [shape=doublecircle];
   0 -> 1 [label="a"];
   1 -> 2 [label="b"];
   1 -> 3 [label="f"];
@@ -25,5 +28,8 @@ digraph {
   14 -> 19 [label="c"];
   15 -> 20 [label="e"];
   16 -> 21 [label="e"];
-  
+  18 -> 22 [label="f"];
+  19 -> 23 [label="d"];
+  20 -> 24 [label="f"];
+  21 -> 25 [label="f"];
 }
