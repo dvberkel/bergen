@@ -81,6 +81,8 @@ Mountain ranges our used to represent the different operators. Below you can fin
 The `bergen` parser can be in a few states while parsing input. Below we will
 show the states and the allowed transitions.
 
+![States of the `bergen` parser](https://cdn.rawgit.com/dvberkel/bergen/f7e438ef/states.png)
+
 ## Tools
 The following tools are being implemented.
 
