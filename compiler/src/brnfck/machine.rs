@@ -16,7 +16,7 @@ impl<'a, I, O> Machine<'a, I, O> where I: Read, O: Write {
 	pub fn new(instructions: &'a[Command]) -> Machine<'a, I, O> {
 		Machine { input: None, output: None, instruction_pointer: 0, instructions: instructions, cell_pointer: 0, cells : [0;SIZE] }
 	}
-	
+
 	pub fn io(instructions: &'a[Command], input: Box<I>, output: Box<O>) -> Machine<'a, I, O> {
 		Machine { input: Some(input), output: Some(output), instruction_pointer: 0, instructions: instructions, cell_pointer: 0, cells : [0;SIZE] }
 	}
@@ -230,7 +230,7 @@ pub enum MachineError {
 	NoByteRead,
 	NoOutput,
 	OutputError,
-	NoByteWritten,	
+	NoByteWritten,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -253,7 +253,7 @@ mod tests {
 		instruction_pointer: usize,
 		instructions: &'a [Command],
 		cell_pointer: usize,
-		cells: [u8; SIZE],	
+		cells: [u8; SIZE],
 	}
 
 	impl<'a> BuildMachine<'a> {
@@ -326,7 +326,7 @@ mod tests {
 
 	#[test]
 	fn increment_pointer_should_error_when_on_boundary() {
-		let instructions = [Command::IncrementPointer];			
+		let instructions = [Command::IncrementPointer];
 		let machine = BuildMachine::with(&instructions).cell_pointer_at(SIZE - 1).build();
 
 		if let Err(result_error) = machine.execute() {
@@ -338,7 +338,7 @@ mod tests {
 
 	#[test]
 	fn increment_should_error_when_on_around() {
-		let instructions = [Command::Increment];			
+		let instructions = [Command::Increment];
 		let machine = BuildMachine::with(&instructions).cell(0, u8::max_value()).build();
 
 		if let Err(result_error) = machine.execute() {
@@ -347,10 +347,10 @@ mod tests {
 			assert!(false);
 		}
 	}
-	
+
 	#[test]
 	fn jump_ahead_should_error_when_missing_jump_back() {
-		let instructions = [Command::JumpAhead];			
+		let instructions = [Command::JumpAhead];
 		let machine: Machine<&[u8], Vec<u8>> = Machine::new(&instructions);
 
 		if let Err(result_error) = machine.execute() {
@@ -359,10 +359,10 @@ mod tests {
 			assert!(false);
 		}
 	}
-	
+
 	#[test]
 	fn jump_back_should_error_when_missing_jump_ahead() {
-		let instructions = [Command::JumpBack];			
+		let instructions = [Command::JumpBack];
 		let machine = BuildMachine::with(&instructions).cell(0, 1).build();
 
 		if let Err(result_error) = machine.execute() {
@@ -418,4 +418,4 @@ mod tests {
 
 		assert!(machine.halted());
 	}
-} 
+}
