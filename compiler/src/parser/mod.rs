@@ -1,5 +1,7 @@
 use super::brnfck::Command;
 
+const NEWLINE : u8 = 10u8;
+
 pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
     if let Ok((top, middle, bottom)) = rows(source) {
         if top.len() != 0 {
@@ -15,17 +17,17 @@ pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
 
 fn rows(source: &[u8]) -> Result<(&[u8], &[u8], &[u8]), ParseError> {
     let mut index = 0;
-    while index < source.len() && source[index] != 10 {
+    while index < source.len() && source[index] != NEWLINE {
         index += 1;
     }
     let first_index = index;
     index += 1;
-    while index < source.len() && source[index] != 10 {
+    while index < source.len() && source[index] != NEWLINE {
         index += 1;
     }
     let second_index = index;
     index += 1;
-    while index < source.len() && source[index] != 10 {
+    while index < source.len() && source[index] != NEWLINE {
         index += 1;
     }
     let third_index = index;
