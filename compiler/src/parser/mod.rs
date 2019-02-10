@@ -7,7 +7,7 @@ pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
         if top.len() != middle.len() || middle.len() != bottom.len() { return Err(ParseError::DifferentNumberOfRows)}
         let mut program = vec![];
         let mut column = 0;
-        if column < top.len() {
+        while column < top.len() {
             if let Some((command, next_column)) = peek(column, top, middle, bottom) {
                 column = next_column;
                 program.push(command);
@@ -220,6 +220,18 @@ mod tests {
         if let Ok(instructions) = parse(source) {
             assert_eq!(instructions.len(), 1);
             assert_eq!(instructions, vec![Command::Read])
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn should_parse_program() {
+        let source: &[u8] = "          \n /\\  /\\/\\ \n/  \\/    \\\n".as_bytes();
+
+        if let Ok(instructions) = parse(source) {
+            assert_eq!(instructions.len(), 2);
+            assert_eq!(instructions, vec![Command::Increment, Command::Decrement])
         } else {
             assert!(false);
         }
