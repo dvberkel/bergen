@@ -3,16 +3,14 @@ use super::brnfck::Command;
 const NEWLINE : u8 = 10u8;
 
 pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
-    if let Ok((top, middle, bottom)) = rows(source) {
+    rows(source).and_then(|(top, middle, bottom)|{
         if top.len() != middle.len() || middle.len() != bottom.len() { return Err(ParseError::DifferentNumberOfRows)}
         if top.len() != 0 {
             Ok(vec!(Command::IncrementPointer))
         } else {
             Ok(vec![])
         }
-    } else {
-        Ok(vec![])
-   }
+    })
 }
 
 
@@ -37,13 +35,14 @@ fn rows(source: &[u8]) -> Result<(&[u8], &[u8], &[u8]), ParseError> {
             &source[ first_index+1 .. second_index],
             &source[second_index+1 .. third_index]))
     } else {
-        Err(ParseError::Unknown)
+        Err(ParseError::NotEnoughRows)
     }
 }
 #[derive(Debug, PartialEq)]
 pub enum ParseError {
     Unknown,
     DifferentNumberOfRows,
+    NotEnoughRows,
 }
 
 #[cfg(test)]
@@ -80,6 +79,17 @@ mod tests {
 
         if let Err(problem) = parse(source) {
             assert_eq!(problem, ParseError::DifferentNumberOfRows);
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn should_throw_when_there_are_to_few_rows() {
+        let source: &[u8] = " \n\n".as_bytes();
+
+        if let Err(problem) = parse(source) {
+            assert_eq!(problem, ParseError::NotEnoughRows);
         } else {
             assert!(false);
         }
