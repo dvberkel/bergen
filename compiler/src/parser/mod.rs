@@ -6,7 +6,8 @@ pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
     rows(source).and_then(|(top, middle, bottom)|{
         if top.len() != middle.len() || middle.len() != bottom.len() { return Err(ParseError::DifferentNumberOfRows)}
         let mut program = vec![];
-        if top.len() != 0 {
+        let mut column = 0;
+        if column < top.len() {
             program.push(Command::IncrementPointer);
         } 
         Ok(program)
