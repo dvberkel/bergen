@@ -4,6 +4,7 @@ const NEWLINE : u8 = 10u8;
 
 pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
     if let Ok((top, middle, bottom)) = rows(source) {
+        if top.len() != middle.len() || middle.len() != bottom.len() { return Err(ParseError::DifferentNumberOfRows)}
         if top.len() != 0 {
             Ok(vec!(Command::IncrementPointer))
         } else {
@@ -39,9 +40,10 @@ fn rows(source: &[u8]) -> Result<(&[u8], &[u8], &[u8]), ParseError> {
         Err(ParseError::Unknown)
     }
 }
-
+#[derive(Debug, PartialEq)]
 pub enum ParseError {
-    Unknown
+    Unknown,
+    DifferentNumberOfRows,
 }
 
 #[cfg(test)]
@@ -67,6 +69,17 @@ mod tests {
         if let Ok(instructions) = parse(source) {
             assert_eq!(instructions.len(), 1);
             assert_eq!(instructions, vec![Command::IncrementPointer])
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn should_throw_when_number_of_columns_do_not_agree() {
+        let source: &[u8] = " \n\n\n".as_bytes();
+
+        if let Err(problem) = parse(source) {
+            assert_eq!(problem, ParseError::DifferentNumberOfRows);
         } else {
             assert!(false);
         }
