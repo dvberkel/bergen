@@ -48,6 +48,13 @@ fn peek(column: usize, top: &[u8], middle: &[u8], bottom: &[u8]) -> Option<(Comm
                return Some((Command::Decrement, column + 6));
            } 
     }
+    if (column + 8) <= top.len() {
+        if    &top[column .. column + 8] == "  /\\    ".as_bytes() &&
+           &middle[column .. column + 8] == " /  \\/\\ ".as_bytes() &&
+           &bottom[column .. column + 8] == "/      \\".as_bytes() {
+               return Some((Command::JumpAhead, column + 8));
+           } 
+    }
     None
 }
 
@@ -144,6 +151,18 @@ mod tests {
         if let Ok(instructions) = parse(source) {
             assert_eq!(instructions.len(), 1);
             assert_eq!(instructions, vec![Command::Decrement])
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn should_parse_jump_ahead() {
+        let source: &[u8] = "  /\\    \n /  \\/\\ \n/      \\\n".as_bytes();
+
+        if let Ok(instructions) = parse(source) {
+            assert_eq!(instructions.len(), 1);
+            assert_eq!(instructions, vec![Command::JumpAhead])
         } else {
             assert!(false);
         }
