@@ -8,10 +8,33 @@ pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
         let mut program = vec![];
         let mut column = 0;
         if column < top.len() {
-            program.push(Command::IncrementPointer);
+            if let Some((command, next_column)) = peek(column, top, middle, bottom) {
+                column = next_column;
+                program.push(command);
+            } else {
+                return Err(ParseError::UnknownMountainRange(column));
+            }
         } 
         Ok(program)
     })
+}
+
+fn peek(column: usize, top: &[u8], middle: &[u8], bottom: &[u8]) -> Option<(Command, usize)> {
+    if (column + 6) <= top.len() {
+        if    &top[column .. column + 6] == "  /\\  ".as_bytes() &&
+           &middle[column .. column + 6] == " /  \\ ".as_bytes() &&
+           &bottom[column .. column + 6] == "/    \\".as_bytes() {
+               return Some((Command::IncrementPointer, column + 6));
+           }
+    }
+    if (column + 8) <= top.len() {
+        if    &top[column .. column + 8] == "  /\\/\\  ".as_bytes() &&
+           &middle[column .. column + 8] == " /    \\ ".as_bytes() &&
+           &bottom[column .. column + 8] == "/      \\".as_bytes() {
+               return Some((Command::DecrementPointer, column + 8));
+           } 
+    }
+    None
 }
 
 
@@ -42,8 +65,9 @@ fn rows(source: &[u8]) -> Result<(&[u8], &[u8], &[u8]), ParseError> {
 #[derive(Debug, PartialEq)]
 pub enum ParseError {
     Unknown,
-    DifferentNumberOfRows,
     NotEnoughRows,
+    DifferentNumberOfRows,
+    UnknownMountainRange(usize),
 }
 
 #[cfg(test)]
@@ -69,6 +93,18 @@ mod tests {
         if let Ok(instructions) = parse(source) {
             assert_eq!(instructions.len(), 1);
             assert_eq!(instructions, vec![Command::IncrementPointer])
+        } else {
+            assert!(false);
+        }
+    }
+
+     #[test]
+    fn should_parse_decrement_pointer() {
+        let source: &[u8] = "  /\\/\\  \n /    \\ \n/      \\\n".as_bytes();
+
+        if let Ok(instructions) = parse(source) {
+            assert_eq!(instructions.len(), 1);
+            assert_eq!(instructions, vec![Command::DecrementPointer])
         } else {
             assert!(false);
         }
