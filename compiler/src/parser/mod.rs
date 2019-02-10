@@ -69,6 +69,13 @@ fn peek(column: usize, top: &[u8], middle: &[u8], bottom: &[u8]) -> Option<(Comm
                return Some((Command::Write, column + 2));
            } 
     }
+    if (column + 10) <= top.len() {
+        if    &top[column .. column + 10] == "  /\\  /\\  ".as_bytes() &&
+           &middle[column .. column + 10] == " /  \\/  \\ ".as_bytes() &&
+           &bottom[column .. column + 10] == "/        \\".as_bytes() {
+               return Some((Command::Read, column + 10));
+           } 
+    }
     None
 }
 
@@ -201,6 +208,18 @@ mod tests {
         if let Ok(instructions) = parse(source) {
             assert_eq!(instructions.len(), 1);
             assert_eq!(instructions, vec![Command::Write])
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn should_parse_read() {
+        let source: &[u8] = "  /\\  /\\  \n /  \\/  \\ \n/        \\\n".as_bytes();
+
+        if let Ok(instructions) = parse(source) {
+            assert_eq!(instructions.len(), 1);
+            assert_eq!(instructions, vec![Command::Read])
         } else {
             assert!(false);
         }
