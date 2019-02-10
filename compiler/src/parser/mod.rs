@@ -5,11 +5,11 @@ const NEWLINE : u8 = 10u8;
 pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
     rows(source).and_then(|(top, middle, bottom)|{
         if top.len() != middle.len() || middle.len() != bottom.len() { return Err(ParseError::DifferentNumberOfRows)}
+        let mut program = vec![];
         if top.len() != 0 {
-            Ok(vec!(Command::IncrementPointer))
-        } else {
-            Ok(vec![])
-        }
+            program.push(Command::IncrementPointer);
+        } 
+        Ok(program)
     })
 }
 
