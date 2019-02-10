@@ -34,6 +34,13 @@ fn peek(column: usize, top: &[u8], middle: &[u8], bottom: &[u8]) -> Option<(Comm
                return Some((Command::DecrementPointer, column + 8));
            } 
     }
+    if (column + 4) <= top.len() {
+        if    &top[column .. column + 4] == "    ".as_bytes() &&
+           &middle[column .. column + 4] == " /\\ ".as_bytes() &&
+           &bottom[column .. column + 4] == "/  \\".as_bytes() {
+               return Some((Command::Increment, column + 4));
+           } 
+    }
     None
 }
 
@@ -62,6 +69,7 @@ fn rows(source: &[u8]) -> Result<(&[u8], &[u8], &[u8]), ParseError> {
         Err(ParseError::NotEnoughRows)
     }
 }
+
 #[derive(Debug, PartialEq)]
 pub enum ParseError {
     Unknown,
@@ -98,13 +106,25 @@ mod tests {
         }
     }
 
-     #[test]
+    #[test]
     fn should_parse_decrement_pointer() {
         let source: &[u8] = "  /\\/\\  \n /    \\ \n/      \\\n".as_bytes();
 
         if let Ok(instructions) = parse(source) {
             assert_eq!(instructions.len(), 1);
             assert_eq!(instructions, vec![Command::DecrementPointer])
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn should_parse_increment() {
+        let source: &[u8] = "    \n /\\ \n/  \\\n".as_bytes();
+
+        if let Ok(instructions) = parse(source) {
+            assert_eq!(instructions.len(), 1);
+            assert_eq!(instructions, vec![Command::Increment])
         } else {
             assert!(false);
         }
