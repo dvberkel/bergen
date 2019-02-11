@@ -1,4 +1,4 @@
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
 
 mod machine;
 
@@ -16,6 +16,15 @@ pub fn io_run<I: Read, O: Write>(instructions: &[machine::Command], input: I, ou
 	let machine: machine::Machine<I, O> = machine::Machine::io(instructions, input_box, output_box);
 
 	machine.run()
+}
+
+pub fn to_brnfck<O: Write>(instructions: &[machine::Command], mut output: O) -> Result<(), io::Error> {
+	let mut program = String::new();
+	for instruction in instructions {
+		program.push(instruction.to_brnfck())
+	}
+
+	output.write_all(program.as_bytes())
 }
 
 #[cfg(test)]

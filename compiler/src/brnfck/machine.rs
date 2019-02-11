@@ -245,6 +245,21 @@ pub enum Command {
 	Write,
 }
 
+impl Command {
+	pub fn to_brnfck(&self) -> char {
+		match self {
+			Command::IncrementPointer => '>',
+			Command::DecrementPointer => '<',
+			Command::Increment => '+',
+			Command::Decrement => '-',
+			Command::JumpAhead => '[',
+			Command::JumpBack => ']',
+			Command::Read => ',',
+			Command::Write => '.',
+		}
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
