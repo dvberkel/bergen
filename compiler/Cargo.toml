@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Daan van Berkel <Daan.vanBerkel@han.nl>"]
 
 [dependencies]
+"clap" = "*"
