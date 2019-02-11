@@ -1,7 +1,8 @@
 extern crate bergen;
 extern crate clap;
 
-use bergen::brnfck::run;
+use std::io;
+use bergen::brnfck::io_run;
 use bergen::parser::parse;
 use clap::{Arg, App};
 use std::fs::File;
@@ -28,7 +29,7 @@ fn main() {
     reader.read_to_end(&mut source).expect("to be able to read file");
 
     if let Ok(instructions) = parse(&source) {
-        if let Ok(_) = run(&instructions) {
+        if let Ok(_) = io_run(&instructions, io::stdin(), io::stdout()) {
             println!("Ran machine");
         }
     }
