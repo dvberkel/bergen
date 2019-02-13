@@ -147,4 +147,17 @@ mod tests {
             assert!(false);
         }
     }
+
+    #[test]
+    #[allow(non_snake_case)]
+    fn should_parse_program_wuth_whitespace() {
+        let source = "++ [ - ] ".as_bytes();
+
+        if let Ok(program) = parse(&source) {
+            assert_eq!(program.len(), 5);
+            assert_eq!(program, vec!(Command::Increment, Command::Increment, Command::JumpAhead, Command::Decrement, Command::JumpBack));
+        } else {
+            assert!(false);
+        }
+    }
 }
