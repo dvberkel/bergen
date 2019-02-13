@@ -1,10 +1,12 @@
 use super::brnfck::Command;
 
-const NEWLINE : u8 = 10u8;
+const NEWLINE: u8 = 10u8;
 
 pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
-    rows(source).and_then(|(top, middle, bottom)|{
-        if top.len() != middle.len() || middle.len() != bottom.len() { return Err(ParseError::DifferentNumberOfRows)}
+    rows(source).and_then(|(top, middle, bottom)| {
+        if top.len() != middle.len() || middle.len() != bottom.len() {
+            return Err(ParseError::DifferentNumberOfRows);
+        }
         let mut program = vec![];
         let mut column = 0;
         while column < top.len() {
@@ -14,71 +16,78 @@ pub fn parse(source: &[u8]) -> Result<Vec<Command>, ParseError> {
             } else {
                 return Err(ParseError::UnknownMountainRange(column));
             }
-        } 
+        }
         Ok(program)
     })
 }
 
 fn peek(column: usize, top: &[u8], middle: &[u8], bottom: &[u8]) -> Option<(Command, usize)> {
     if (column + 6) <= top.len() {
-        if    &top[column .. column + 6] == "  /\\  ".as_bytes() &&
-           &middle[column .. column + 6] == " /  \\ ".as_bytes() &&
-           &bottom[column .. column + 6] == "/    \\".as_bytes() {
-               return Some((Command::IncrementPointer, column + 6));
-           }
+        if &top[column..column + 6] == "  /\\  ".as_bytes()
+            && &middle[column..column + 6] == " /  \\ ".as_bytes()
+            && &bottom[column..column + 6] == "/    \\".as_bytes()
+        {
+            return Some((Command::IncrementPointer, column + 6));
+        }
     }
     if (column + 8) <= top.len() {
-        if    &top[column .. column + 8] == "  /\\/\\  ".as_bytes() &&
-           &middle[column .. column + 8] == " /    \\ ".as_bytes() &&
-           &bottom[column .. column + 8] == "/      \\".as_bytes() {
-               return Some((Command::DecrementPointer, column + 8));
-           } 
+        if &top[column..column + 8] == "  /\\/\\  ".as_bytes()
+            && &middle[column..column + 8] == " /    \\ ".as_bytes()
+            && &bottom[column..column + 8] == "/      \\".as_bytes()
+        {
+            return Some((Command::DecrementPointer, column + 8));
+        }
     }
     if (column + 4) <= top.len() {
-        if    &top[column .. column + 4] == "    ".as_bytes() &&
-           &middle[column .. column + 4] == " /\\ ".as_bytes() &&
-           &bottom[column .. column + 4] == "/  \\".as_bytes() {
-               return Some((Command::Increment, column + 4));
-           } 
+        if &top[column..column + 4] == "    ".as_bytes()
+            && &middle[column..column + 4] == " /\\ ".as_bytes()
+            && &bottom[column..column + 4] == "/  \\".as_bytes()
+        {
+            return Some((Command::Increment, column + 4));
+        }
     }
     if (column + 6) <= top.len() {
-        if    &top[column .. column + 6] == "      ".as_bytes() &&
-           &middle[column .. column + 6] == " /\\/\\ ".as_bytes() &&
-           &bottom[column .. column + 6] == "/    \\".as_bytes() {
-               return Some((Command::Decrement, column + 6));
-           } 
+        if &top[column..column + 6] == "      ".as_bytes()
+            && &middle[column..column + 6] == " /\\/\\ ".as_bytes()
+            && &bottom[column..column + 6] == "/    \\".as_bytes()
+        {
+            return Some((Command::Decrement, column + 6));
+        }
     }
     if (column + 8) <= top.len() {
-        if    &top[column .. column + 8] == "  /\\    ".as_bytes() &&
-           &middle[column .. column + 8] == " /  \\/\\ ".as_bytes() &&
-           &bottom[column .. column + 8] == "/      \\".as_bytes() {
-               return Some((Command::JumpAhead, column + 8));
-           } 
+        if &top[column..column + 8] == "  /\\    ".as_bytes()
+            && &middle[column..column + 8] == " /  \\/\\ ".as_bytes()
+            && &bottom[column..column + 8] == "/      \\".as_bytes()
+        {
+            return Some((Command::JumpAhead, column + 8));
+        }
     }
     if (column + 8) <= top.len() {
-        if    &top[column .. column + 8] == "    /\\  ".as_bytes() &&
-           &middle[column .. column + 8] == " /\\/  \\ ".as_bytes() &&
-           &bottom[column .. column + 8] == "/      \\".as_bytes() {
-               return Some((Command::JumpBack, column + 8));
-           } 
+        if &top[column..column + 8] == "    /\\  ".as_bytes()
+            && &middle[column..column + 8] == " /\\/  \\ ".as_bytes()
+            && &bottom[column..column + 8] == "/      \\".as_bytes()
+        {
+            return Some((Command::JumpBack, column + 8));
+        }
     }
     if (column + 2) <= top.len() {
-        if    &top[column .. column + 2] == "  ".as_bytes() &&
-           &middle[column .. column + 2] == "  ".as_bytes() &&
-           &bottom[column .. column + 2] == "/\\".as_bytes() {
-               return Some((Command::Write, column + 2));
-           } 
+        if &top[column..column + 2] == "  ".as_bytes()
+            && &middle[column..column + 2] == "  ".as_bytes()
+            && &bottom[column..column + 2] == "/\\".as_bytes()
+        {
+            return Some((Command::Write, column + 2));
+        }
     }
     if (column + 10) <= top.len() {
-        if    &top[column .. column + 10] == "  /\\  /\\  ".as_bytes() &&
-           &middle[column .. column + 10] == " /  \\/  \\ ".as_bytes() &&
-           &bottom[column .. column + 10] == "/        \\".as_bytes() {
-               return Some((Command::Read, column + 10));
-           } 
+        if &top[column..column + 10] == "  /\\  /\\  ".as_bytes()
+            && &middle[column..column + 10] == " /  \\/  \\ ".as_bytes()
+            && &bottom[column..column + 10] == "/        \\".as_bytes()
+        {
+            return Some((Command::Read, column + 10));
+        }
     }
     None
 }
-
 
 fn rows(source: &[u8]) -> Result<(&[u8], &[u8], &[u8]), ParseError> {
     let mut index = 0;
@@ -97,9 +106,11 @@ fn rows(source: &[u8]) -> Result<(&[u8], &[u8], &[u8]), ParseError> {
     }
     let third_index = index;
     if index < source.len() {
-        Ok((&source[             0 .. first_index],
-            &source[ first_index+1 .. second_index],
-            &source[second_index+1 .. third_index]))
+        Ok((
+            &source[0..first_index],
+            &source[first_index + 1..second_index],
+            &source[second_index + 1..third_index],
+        ))
     } else {
         Err(ParseError::NotEnoughRows)
     }
@@ -115,8 +126,8 @@ pub enum ParseError {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::brnfck::Command;
+    use super::*;
 
     #[test]
     fn should_parse_empty_source() {
