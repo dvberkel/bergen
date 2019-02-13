@@ -308,6 +308,45 @@ impl Command {
             Command::Write => '.',
         }
     }
+
+	pub fn top(&self) -> &str {
+		match self {
+            Command::IncrementPointer => "  /\\  ",
+            Command::DecrementPointer => "  /\\/\\  ",
+            Command::Increment => "    ",
+            Command::Decrement => "    ",
+            Command::JumpAhead => "  /\\    ",
+            Command::JumpBack => "    /\\  ",
+            Command::Read => "  ",
+            Command::Write => "  /\\  /\\  ",
+		}
+	}
+
+	pub fn middle(&self) -> &str {
+		match self {
+            Command::IncrementPointer => " /  \\ ",
+            Command::DecrementPointer => " /    \\ ",
+            Command::Increment => " /\\ ",
+            Command::Decrement => " /\\/\\ ",
+            Command::JumpAhead => " /  \\/\\ ",
+            Command::JumpBack => " /\\/  \\ ",
+            Command::Read => "  ",
+            Command::Write => " /  \\/  \\ ",
+		}
+	}
+
+	pub fn bottom(&self) -> &str {
+		match self {
+            Command::IncrementPointer => "/    \\",
+            Command::DecrementPointer => "/      \\",
+            Command::Increment => "/  \\",
+            Command::Decrement => "/    \\",
+            Command::JumpAhead => "/      \\",
+            Command::JumpBack => "/      \\",
+            Command::Read => "/\\",
+            Command::Write => "/        \\",
+		}
+	}
 }
 
 #[cfg(test)]

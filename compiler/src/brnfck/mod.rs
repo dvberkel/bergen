@@ -1,4 +1,7 @@
 use std::io::{self, Read, Write};
+use std::ops::Add;
+
+const NEWLINE: [u8;1] = [10];
 
 mod machine;
 mod parser;
@@ -34,6 +37,23 @@ pub fn to_brnfck<O: Write>(
 
     output.write_all(program.as_bytes())
 }
+
+pub fn to_bergen<O: Write>(instructions: &[machine::Command], mut output: O) -> Result<(), io::Error> {
+	let (mut top, mut middle, mut bottom) = (String::new(), String::new(), String::new());
+	for instruction in instructions {
+		top = top + instruction.top();
+		middle = middle + instruction.middle();
+		bottom = bottom + instruction.bottom();
+	}
+
+	output.write_all(top.as_bytes())?;
+	output.write_all(&NEWLINE)?;
+	output.write_all(middle.as_bytes())?;
+	output.write_all(&NEWLINE)?;
+	output.write_all(bottom.as_bytes())?;
+	output.write_all(&NEWLINE)
+}
+
 
 #[cfg(test)]
 mod tests {
