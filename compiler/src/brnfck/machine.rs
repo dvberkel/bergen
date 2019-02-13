@@ -314,7 +314,7 @@ impl Command {
             Command::IncrementPointer => "  /\\  ",
             Command::DecrementPointer => "  /\\/\\  ",
             Command::Increment => "    ",
-            Command::Decrement => "    ",
+            Command::Decrement => "      ",
             Command::JumpAhead => "  /\\    ",
             Command::JumpBack => "    /\\  ",
             Command::Read => "  ",

@@ -4,7 +4,7 @@ use std::ops::Add;
 const NEWLINE: [u8;1] = [10];
 
 mod machine;
-mod parser;
+pub mod parser;
 
 pub use self::machine::{Command, MachineError};
 
