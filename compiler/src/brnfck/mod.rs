@@ -1,6 +1,7 @@
 use std::io::{self, Read, Write};
 
 mod machine;
+mod parser;
 
 pub use self::machine::{Command, MachineError};
 
