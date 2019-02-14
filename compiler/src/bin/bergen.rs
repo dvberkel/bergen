@@ -34,7 +34,7 @@ fn main() {
 
     if let Ok(instructions) = parse(&source) {
         if let Ok(_) = io_run(&instructions, io::stdin(), io::stdout()) {
-            println!("Ran machine");
+            // println!("Ran machine");
         }
     }
 }

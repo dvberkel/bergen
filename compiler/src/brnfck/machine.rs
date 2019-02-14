@@ -317,8 +317,8 @@ impl Command {
             Command::Decrement => "      ",
             Command::JumpAhead => "  /\\    ",
             Command::JumpBack => "    /\\  ",
-            Command::Read => "  ",
-            Command::Write => "  /\\  /\\  ",
+            Command::Write => "  ",
+            Command::Read => "  /\\  /\\  ",
 		}
 	}
 
@@ -330,8 +330,8 @@ impl Command {
             Command::Decrement => " /\\/\\ ",
             Command::JumpAhead => " /  \\/\\ ",
             Command::JumpBack => " /\\/  \\ ",
-            Command::Read => "  ",
-            Command::Write => " /  \\/  \\ ",
+            Command::Write => "  ",
+            Command::Read => " /  \\/  \\ ",
 		}
 	}
 
@@ -343,8 +343,8 @@ impl Command {
             Command::Decrement => "/    \\",
             Command::JumpAhead => "/      \\",
             Command::JumpBack => "/      \\",
-            Command::Read => "/\\",
-            Command::Write => "/        \\",
+            Command::Write => "/\\",
+            Command::Read => "/        \\",
 		}
 	}
 }

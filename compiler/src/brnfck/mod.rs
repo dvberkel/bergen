@@ -54,6 +54,30 @@ pub fn to_bergen<O: Write>(instructions: &[machine::Command], mut output: O) -> 
 	output.write_all(&NEWLINE)
 }
 
+pub fn program_from(instructions: &[u8]) -> Vec<Command> {
+    let mut program = Vec::new();
+    let mut initial = instructions[0];
+    while initial > 0 {
+        program.push(Command::Increment);
+        initial -= 1;
+    }
+    program.push(Command::Write);
+    let mut index = 1;
+    while index < instructions.len() {
+        let mut difference = instructions[index] as i16 - instructions[index - 1] as i16;
+        let command = if difference > 0 { Command::Increment} else { Command::Decrement };
+        difference = difference.abs();
+        while difference > 0 {
+            program.push(command);
+            difference -= 1;
+        }
+        program.push(Command::Write);
+        index += 1;
+    }
+
+    program
+}
+
 
 #[cfg(test)]
 mod tests {
