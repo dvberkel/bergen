@@ -56,28 +56,55 @@ pub fn to_bergen<O: Write>(instructions: &[machine::Command], mut output: O) -> 
 
 pub fn program_from(characters: &[u8]) -> Vec<Command> {
     let mut program = Vec::new();
-    let mut initial = characters[0];
-    while initial > 0 {
-        program.push(Command::Increment);
-        initial -= 1;
-    }
-    program.push(Command::Write);
-    let mut index = 1;
+    let mut index = 0;
+    let mut last_character = 0;
     while index < characters.len() {
-        let mut difference = characters[index] as i16 - characters[index - 1] as i16;
-        let command = if difference > 0 { Command::Increment} else { Command::Decrement };
+        let mut difference = characters[index] as i16 - last_character as i16;
+        let command = if difference > 0 { Command::Increment } else { Command::Decrement };
         difference = difference.abs();
-        while difference > 0 {
+        if difference >= 2 {
+            let factors = factors_of(difference);
+            change_to_character_by(factors.len(), &factors, command, &mut program);
+        } else if difference == 1 {
             program.push(command);
-            difference -= 1;
+        } else {
+            /* do nothing; difference == 0 */
         }
         program.push(Command::Write);
+        last_character = characters[index];
         index += 1;
     }
 
     program
 }
 
+fn change_to_character_by(n: usize, factors: &[i16], command: Command, program : &mut Vec<Command>)  {
+    if factors.len() == 0 {
+        alter_to_left(n, command, program);
+    } else {
+        program.push(Command::IncrementPointer);
+        let mut factor = factors[0];
+        while factor > 0 {
+            program.push(Command::Increment);
+            factor -= 1;
+        }
+        program.push(Command::JumpAhead);
+        change_to_character_by(n, &factors[1..], command, program);
+        program.push(Command::Decrement);
+        program.push(Command::JumpBack);
+        program.push(Command::DecrementPointer);
+    }
+}
+
+fn alter_to_left(n: usize, command: Command, program: &mut Vec<Command>) {
+    if n == 0 {
+        program.push(command);
+    } else {
+        program.push(Command::DecrementPointer);
+        alter_to_left(n - 1, command, program);
+        program.push(Command::IncrementPointer);
+    }
+}
 
 fn factors_of(mut n: i16) -> Vec<i16> {
     let mut factors = Vec::new();
