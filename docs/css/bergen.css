@@ -1,0 +1,16 @@
+.content-warning .warning:before {
+    content: "[CW: ";
+}
+
+.content-warning .warning:after {
+    content: "]"
+}
+
+.content-warning .warning:before, .content-warning .warning, content-warning:after {
+    font-weight: bold;
+}
+
+.content-warning {
+    position: absolute;
+    bottom: 12px;
+}
