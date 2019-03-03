@@ -14,3 +14,10 @@
     position: absolute;
     bottom: 12px;
 }
+
+.haiku {
+    font-size: 30px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
