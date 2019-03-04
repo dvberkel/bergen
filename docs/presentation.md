@@ -33,7 +33,7 @@
 * Software development; a narrow view what can be done
 * Where is the fun?
 * Where is the creativity?
-* How does work?
+* How does it work?
 
 ---
 
@@ -43,4 +43,31 @@
 
 # Brainf*ck
 ## What is brainfuck
+
+--
+
+### Bank of registers
+
+--
+
+### Register pointer
+
+--
+
+### Instructions
+
+---
+
+# Dialects
+
+--
+
+## Ook!
+
+Map into Brainf*ck
+
+---
+
+# Bergen as well
+
 
