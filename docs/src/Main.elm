@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import BrnFck exposing (Machine, machine)
+import BrnFck exposing (Machine, machine, view)
 import Browser
 import Css exposing (..)
 import Html as PlainHtml
@@ -18,12 +18,6 @@ main =
 init : Machine
 init =
     machine 5
-
-
-view : Machine -> Html msg
-view _ =
-    Html.div [] [ Html.span [] [ Html.text "Hello, World" ] ]
-
 
 update : msg -> Machine -> Machine
 update _ machine =
