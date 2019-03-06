@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import BrnFck exposing (Machine, machine, view)
+import BrnFck exposing (Machine, machine, view, update)
 import Browser
 import Css exposing (..)
 import Html as PlainHtml
@@ -18,7 +18,3 @@ main =
 init : Machine
 init =
     machine 5
-
-update : msg -> Machine -> Machine
-update _ machine =
-    machine

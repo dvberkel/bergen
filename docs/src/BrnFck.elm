@@ -1,11 +1,11 @@
-module BrnFck exposing (Machine, decrement, decrementPointer, increment, incrementPointer, machine, pointerAt, valueAt, view)
+module BrnFck exposing (Machine, decrement, decrementPointer, increment, incrementPointer, machine, pointerAt, update, valueAt, view)
 
 import Array exposing (Array)
 import Css exposing (..)
 import Html as PlainHtml
 import Html.Styled as Html exposing (Html, toUnstyled)
 import Html.Styled.Attributes as Attribute exposing (css)
-
+import Html.Styled.Events as Event
 
 type Machine
     = Machine MachineState
@@ -15,8 +15,12 @@ type alias Register =
     Int
 
 
+type alias Pointer =
+    Int
+
+
 type alias MachineState =
-    { pointer : Int
+    { pointer : Pointer
     , size : Int
     , registers : Array Register
     }
@@ -45,7 +49,7 @@ decrementPointer (Machine ({ pointer } as state)) =
     Machine { state | pointer = value }
 
 
-pointerAt : Int -> Machine -> Machine
+pointerAt : Pointer -> Machine -> Machine
 pointerAt pointer (Machine state) =
     Machine { state | pointer = pointer }
 
@@ -84,15 +88,16 @@ dec n =
     n - 1
 
 
-valueAt : Int -> Register -> Machine -> Machine
+valueAt : Pointer -> Register -> Machine -> Machine
 valueAt pointer value (Machine ({ registers } as state)) =
     Machine { state | registers = registers |> Array.set pointer value }
 
 
-view : Machine -> Html msg
+view : Machine -> Html Message
 view aMachine =
     Html.div [ Attribute.class "machine" ]
         [ viewRegisters aMachine
+        , viewControls
         ]
 
 
@@ -108,7 +113,7 @@ viewRegisters (Machine { registers, pointer }) =
         viewOfRegisters
 
 
-viewRegister : Int -> Int -> Register -> Html msg
+viewRegister : Pointer -> Int -> Register -> Html msg
 viewRegister pointer index register =
     let
         label =
@@ -117,12 +122,14 @@ viewRegister pointer index register =
         colorOfBackground =
             if pointer == index then
                 black
+
             else
                 white
 
         colorOfText =
             if pointer == index then
                 white
+
             else
                 black
     in
@@ -149,6 +156,43 @@ black : Color
 black =
     rgb 0 0 0
 
+
 white : Color
 white =
     rgb 255 255 255
+
+
+viewControls : Html Message
+viewControls =
+    Html.div [ Attribute.class "controls" ]
+        [ control "<" DecrementPointer
+        , control ">" IncrementPointer
+        , control "-" Decrement
+        , control "+" Increment
+        ]
+
+control : String -> msg -> Html msg
+control label onClickMessage =
+    Html.button [ Attribute.class "control", Event.onClick onClickMessage ] [ Html.text label ]
+
+type Message
+    = IncrementPointer
+    | DecrementPointer
+    | Increment
+    | Decrement
+
+
+update : Message -> Machine -> Machine
+update message aMachine =
+    case message of
+        IncrementPointer ->
+            incrementPointer aMachine
+
+        DecrementPointer ->
+            decrementPointer aMachine
+
+        Increment ->
+            increment aMachine
+
+        Decrement ->
+            decrement aMachine
