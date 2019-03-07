@@ -1,4 +1,4 @@
-module BrnFck exposing (Machine, decrement, decrementPointer, increment, incrementPointer, machine, output, pointerAt, update, valueAt, view, withOutput)
+module BrnFck exposing (Machine, Message, decrement, decrementPointer, increment, incrementPointer, machine, output, pointerAt, subscriptions, update, valueAt, view, withOutput)
 
 import Array exposing (Array)
 import Css exposing (..)
@@ -6,6 +6,7 @@ import Html as PlainHtml
 import Html.Styled as Html exposing (Html, toUnstyled)
 import Html.Styled.Attributes as Attribute exposing (css)
 import Html.Styled.Events as Event
+import Keyboard exposing (RawKey)
 
 
 type Machine
@@ -25,12 +26,19 @@ type alias MachineState =
     , size : Int
     , registers : Array Register
     , stdout : String
+    , readyToReceive : Bool
     }
 
 
 machine : Int -> Machine
 machine size =
-    Machine { pointer = 0, size = size, registers = Array.repeat size 0, stdout = "" }
+    Machine
+        { pointer = 0
+        , size = size
+        , registers = Array.repeat size 0
+        , stdout = ""
+        , readyToReceive = False
+        }
 
 
 incrementPointer : Machine -> Machine
@@ -104,13 +112,25 @@ withOutput anOutput (Machine state) =
 
 
 stdoutOf : Machine -> String
-stdoutOf (Machine {stdout}) =
+stdoutOf (Machine { stdout }) =
     stdout
+
 
 dec : Register -> Register
 dec n =
     n - 1
 
+
+startReceiving : Machine -> Machine
+startReceiving (Machine state) =
+    Machine { state | readyToReceive = True }
+
+stopReceiving (Machine state) =
+    Machine { state | readyToReceive = False }
+
+input : Register -> Machine -> Machine
+input value ((Machine {pointer}) as aMachine) =
+    valueAt pointer value aMachine
 
 valueAt : Pointer -> Register -> Machine -> Machine
 valueAt pointer value (Machine ({ registers } as state)) =
@@ -195,6 +215,7 @@ viewControls =
         , control "-" Decrement
         , control "+" Increment
         , control "." Output
+        , control "," Input
         ]
 
 
@@ -218,22 +239,58 @@ type Message
     | Increment
     | Decrement
     | Output
+    | Input
+    | KeyDown RawKey
+    | KeyUp RawKey
 
 
-update : Message -> Machine -> Machine
-update message aMachine =
-    case message of
-        IncrementPointer ->
-            incrementPointer aMachine
+update : Message -> Machine -> ( Machine, Cmd Message )
+update message ((Machine { readyToReceive }) as aMachine) =
+    let
+        nextMachine =
+            case message of
+                IncrementPointer ->
+                    incrementPointer aMachine
 
-        DecrementPointer ->
-            decrementPointer aMachine
+                DecrementPointer ->
+                    decrementPointer aMachine
 
-        Increment ->
-            increment aMachine
+                Increment ->
+                    increment aMachine
 
-        Decrement ->
-            decrement aMachine
+                Decrement ->
+                    decrement aMachine
 
-        Output ->
-            output aMachine
+                Output ->
+                    output aMachine
+
+                Input ->
+                    startReceiving aMachine
+
+                KeyDown aKey ->
+                    if readyToReceive then
+                        let
+                            value =
+                                aKey
+                                    |> Keyboard.rawValue
+                                    |> String.toList
+                                    |> List.head
+                                    |> Maybe.map Char.toCode
+                                    |> Maybe.withDefault 0
+                        in
+                            input value aMachine
+                    else
+                        aMachine
+
+                KeyUp _ ->
+                    stopReceiving aMachine
+    in
+    ( nextMachine, Cmd.none )
+
+
+subscriptions : Machine -> Sub Message
+subscriptions aMachine =
+    Sub.batch
+        [ Keyboard.downs KeyDown
+        , Keyboard.ups KeyUp
+        ]
