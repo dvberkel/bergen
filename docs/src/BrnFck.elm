@@ -1,4 +1,4 @@
-module BrnFck exposing (Machine, decrement, decrementPointer, increment, incrementPointer, machine, pointerAt, update, valueAt, view)
+module BrnFck exposing (Machine, decrement, decrementPointer, increment, incrementPointer, machine, output, pointerAt, update, valueAt, view, withOutput)
 
 import Array exposing (Array)
 import Css exposing (..)
@@ -6,6 +6,7 @@ import Html as PlainHtml
 import Html.Styled as Html exposing (Html, toUnstyled)
 import Html.Styled.Attributes as Attribute exposing (css)
 import Html.Styled.Events as Event
+
 
 type Machine
     = Machine MachineState
@@ -23,12 +24,13 @@ type alias MachineState =
     { pointer : Pointer
     , size : Int
     , registers : Array Register
+    , stdout : String
     }
 
 
 machine : Int -> Machine
 machine size =
-    Machine { pointer = 0, size = size, registers = Array.repeat size 0 }
+    Machine { pointer = 0, size = size, registers = Array.repeat size 0, stdout = "" }
 
 
 incrementPointer : Machine -> Machine
@@ -83,6 +85,28 @@ decrement (Machine ({ registers, pointer } as state)) =
     Machine { state | registers = registers |> Array.set pointer (max 0 value) }
 
 
+output : Machine -> Machine
+output (Machine ({ registers, pointer, stdout } as state)) =
+    let
+        character =
+            registers
+                |> Array.get pointer
+                |> Maybe.withDefault 0
+                |> Char.fromCode
+                |> String.fromChar
+    in
+    Machine { state | stdout = String.append stdout character }
+
+
+withOutput : String -> Machine -> Machine
+withOutput anOutput (Machine state) =
+    Machine { state | stdout = anOutput }
+
+
+stdoutOf : Machine -> String
+stdoutOf (Machine {stdout}) =
+    stdout
+
 dec : Register -> Register
 dec n =
     n - 1
@@ -98,6 +122,7 @@ view aMachine =
     Html.div [ Attribute.class "machine" ]
         [ viewRegisters aMachine
         , viewControls
+        , viewOutput aMachine
         ]
 
 
@@ -169,17 +194,30 @@ viewControls =
         , control ">" IncrementPointer
         , control "-" Decrement
         , control "+" Increment
+        , control "." Output
         ]
+
 
 control : String -> msg -> Html msg
 control label onClickMessage =
     Html.button [ Attribute.class "control", Event.onClick onClickMessage ] [ Html.text label ]
+
+
+viewOutput : Machine -> Html msg
+viewOutput aMachine =
+    let
+        stdout =
+            stdoutOf aMachine
+    in
+    Html.pre [ Attribute.class "stdout" ] [ Html.text stdout ]
+
 
 type Message
     = IncrementPointer
     | DecrementPointer
     | Increment
     | Decrement
+    | Output
 
 
 update : Message -> Machine -> Machine
@@ -196,3 +234,6 @@ update message aMachine =
 
         Decrement ->
             decrement aMachine
+
+        Output ->
+            output aMachine

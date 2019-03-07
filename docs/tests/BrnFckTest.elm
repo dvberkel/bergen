@@ -95,6 +95,19 @@ suite =
                                 machine 10
                         in
                         Expect.equal actual expected
+                , test "output" <|
+                    \_ ->
+                        let
+                            actual =
+                                machine 10
+                                    |> valueAt 0 (Char.toCode 'A')
+                                    |> output
+
+                            expected =
+                                actual
+                                    |> withOutput "A"
+                        in
+                        Expect.equal actual expected
                 ]
             ]
         ]
