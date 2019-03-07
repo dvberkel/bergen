@@ -216,6 +216,7 @@ viewControls =
         , control "+" Increment
         , control "." Output
         , control "," Input
+        , control "clear" Clear
         ]
 
 
@@ -242,6 +243,7 @@ type Message
     | Input
     | KeyDown RawKey
     | KeyUp RawKey
+    | Clear
 
 
 update : Message -> Machine -> ( Machine, Cmd Message )
@@ -284,6 +286,10 @@ update message ((Machine { readyToReceive }) as aMachine) =
 
                 KeyUp _ ->
                     stopReceiving aMachine
+
+                Clear ->
+                    aMachine
+                        |> withOutput ""
     in
     ( nextMachine, Cmd.none )
 
