@@ -156,8 +156,17 @@ config =
 
 
 view : Machine -> Html Message
-view aMachine =
-    Html.div [ Attribute.class "machine" ]
+view ((Machine { size }) as aMachine) =
+    Html.div
+        [ Attribute.class "machine"
+        , css
+            [ displayFlex
+            , flexDirection column
+            , justifyContent center
+            , alignItems center
+            , width (em <| (*) 3.5 <| toFloat size)
+            ]
+        ]
         [ viewRegisters aMachine
         , viewControls
         , viewOutput aMachine

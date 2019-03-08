@@ -19,4 +19,4 @@ main =
 
 init : Machine
 init =
-    machine 5
+    machine 8
