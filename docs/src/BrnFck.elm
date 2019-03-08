@@ -125,16 +125,34 @@ startReceiving : Machine -> Machine
 startReceiving (Machine state) =
     Machine { state | readyToReceive = True }
 
+
 stopReceiving (Machine state) =
     Machine { state | readyToReceive = False }
 
+
 input : Register -> Machine -> Machine
-input value ((Machine {pointer}) as aMachine) =
+input value ((Machine { pointer }) as aMachine) =
     valueAt pointer value aMachine
+
 
 valueAt : Pointer -> Register -> Machine -> Machine
 valueAt pointer value (Machine ({ registers } as state)) =
     Machine { state | registers = registers |> Array.set pointer value }
+
+
+type alias ViewConfig =
+    { labelWidth : Em
+    , borderWidth : Px
+    , margin : Px
+    }
+
+
+config : ViewConfig
+config =
+    { labelWidth = em 3
+    , borderWidth = px 1
+    , margin = px 2
+    }
 
 
 view : Machine -> Html Message
@@ -184,14 +202,14 @@ viewRegister pointer index register =
             [ display inlineBlock
             , borderColor black
             , borderStyle solid
-            , borderWidth (px 1)
-            , width (em 3)
+            , borderWidth config.borderWidth
+            , width config.labelWidth
             , height (ex 3)
             , lineHeight (ex 3)
             , textAlign center
             , backgroundColor colorOfBackground
             , color colorOfText
-            , margin (px 2)
+            , margin config.margin
             ]
         ]
         [ Html.text label ]
@@ -280,7 +298,8 @@ update message ((Machine { readyToReceive }) as aMachine) =
                                     |> Maybe.map Char.toCode
                                     |> Maybe.withDefault 0
                         in
-                            input value aMachine
+                        input value aMachine
+
                     else
                         aMachine
 
