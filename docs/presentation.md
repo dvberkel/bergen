@@ -41,19 +41,14 @@
 
 ---
 
+<div id="brnfck-container"></div>
+
+???
+
 # Brainf*ck
 ## What is brainfuck
-
---
-
 ### Bank of registers
-
---
-
 ### Register pointer
-
---
-
 ### Instructions
 
 ---

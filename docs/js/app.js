@@ -1,4 +1,4 @@
-(function(remark, haiku){
+(function(remark, haiku, Elm){
     let slideshow = remark.create({
         sourceUrl: 'presentation.md'
     });
@@ -7,4 +7,6 @@
         var h = document.getElementById('haiku');
         h.value = result;
     });
-})(remark, haiku);
+
+    Elm.Main.init({ node: document.getElementById('brnfck-container') });
+})(remark, haiku, Elm);
