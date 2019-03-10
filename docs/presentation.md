@@ -53,6 +53,32 @@
 
 ---
 
+# Language
+
+* `>`
+* `<`
+* `+`
+* `-`
+* `.`
+* `,`
+* `[`
+* `]`
+
+???
+
+* `>` -- increment pointer
+* `<` -- decrement pointer
+* `+` -- increment register
+* `-` -- decrement register
+* `.` -- ASCII output
+* `,` -- ASCII input
+* `[` -- jump to `]` on zero
+* `]` -- jump to `[`
+
+
+
+---
+
 # Dialects
 
 --
