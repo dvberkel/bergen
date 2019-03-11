@@ -75,20 +75,63 @@
 * `[` -- jump to `]` on zero
 * `]` -- jump to `[`
 
-
-
 ---
 
-# Dialects
+
+# Ook!
+
+> Ook! is a programming language designed for orang-utans.
+
+```plain
+Ook.
+Ook?
+Ook!
+```
 
 --
 
-## Ook!
+## Map into Brainf*ck
 
-Map into Brainf*ck
+```
+    Ook. Ook? → >
+    Ook? Ook. → <
+    Ook. Ook. → +
+    Ook! Ook! → -
+    Ook. Ook! → ,
+    Ook! Ook. → . 
+    Ook! Ook? → [
+    Ook? Ook! → ]
+```
+
+???
+
+# Dialects
+
+> Since the word "ook" can convey entire ideas, emotions, and abstract thoughts depending on the nuances of inflection, Ook! has no need of comments. The code itself serves perfectly well to describe in detail what it does and how it does it. Provided you are an orang-utan. 
+
 
 ---
 
-# Bergen as well
+# Bergen
+
+```plain
+  /\
+ /  \
+/    \   → >      /\         → .
+
+  /\/\              /\  /\
+ /    \            /  \/  \
+/      \ → <      /        \ → ,
+
+
+                    /\
+ /\                /  \/\
+/  \     → +      /      \   → [
+
+
+                      /\
+ /\/\              /\/  \
+/    \   → -      /      \   → ] 
+```
 
 
