@@ -152,3 +152,35 @@ Ook!
 
 # Mapping of Bergen onto brainf*ck
 # Marvel at the symmetry
+
+---
+
+# Create Your Own Language Guide™
+
+--
+
+1. Have a interesting idea
+
+--
+
+2. Pick a target 
+
+--
+
+3. Map your idea onto target
+
+--
+
+4. Build a translator
+
+--
+
+5. [Optionally] build an interpreter
+
+--
+
+6. ...
+
+--
+
+7. Fun! 
