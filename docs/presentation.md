@@ -25,7 +25,8 @@
 
 ---
 
-# Bergen
+[![Iconic Bergen? sign](image/bergen.jpg)](https://en.wikipedia.org/wiki/Bergen)
+
 
 ???
 
