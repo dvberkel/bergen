@@ -4,9 +4,24 @@
   <span class="warning">Foul Language</span>
 </div>
 
+???
+
+# The foul language is a name of a esoteric programming language
+
 ---
 
 <textarea id="haiku" class="haiku" rows="8" cols="30" wrap="off"></textarea>
+
+???
+
+# Poem celebrating a great conference
+# But what is the header?
+
+---
+
+# [Demo](https://asciinema.org/a/S3WoUDKA2vJXQbd7qglAu9VEb)
+
+[![asciicast](https://asciinema.org/a/S3WoUDKA2vJXQbd7qglAu9VEb.svg)](https://asciinema.org/a/S3WoUDKA2vJXQbd7qglAu9VEb)
 
 ---
 
@@ -34,10 +49,7 @@
 * Where is the fun?
 * Where is the creativity?
 * How does it work?
-
----
-
-# Target
+* How do you create a language
 
 ---
 
@@ -45,6 +57,8 @@
 
 ???
 
+# Target
+## What machine are you targetting?
 # Brainf*ck
 ## What is brainfuck
 ### Bank of registers
@@ -134,4 +148,7 @@ Ook!
 /    \   → -      /      \   → ] 
 ```
 
+???
 
+# Mapping of Bergen onto brainf*ck
+# Marvel at the symmetry
