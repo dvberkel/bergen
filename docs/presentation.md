@@ -10,6 +10,40 @@
 
 ---
 
+# Croco Loco is Turing-Complete
+
+???
+
+# If you have seen my earlier talks
+# You might suspect this subject
+
+---
+
+# Nope
+
+--
+
+# Croco Loco is not Turing-Complete
+
+???
+
+# that is not true
+
+---
+
+# Croco Loco is a regular language
+
+```
+H(1|2|3)*T
+```
+
+???
+
+# It is only needs a Deterministic Finite Automaton (DFA)
+# Not a Turing Machine
+
+---
+
 <textarea id="haiku" class="haiku" rows="8" cols="30" wrap="off"></textarea>
 
 ???
