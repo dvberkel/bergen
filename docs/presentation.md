@@ -12,6 +12,8 @@
 
 # Croco Loco is Turing-Complete
 
+<center><img src="image/croco-body.png" width="480px" align></center>
+
 ???
 
 # If you have seen my earlier talks
@@ -31,7 +33,9 @@
 
 ---
 
-# Croco Loco is a regular language
+# Croco Loco is a regular
+
+--
 
 ```
 H(1|2|3)*T
