@@ -3,7 +3,7 @@
         sourceUrl: 'presentation.md'
     });
 
-    haiku.load("program/haiku.bergen", function(result){
+    haiku.load("program/hello_joy_of_coding.bergen", function(result){
         var h = document.getElementById('haiku');
         h.value = result;
     });
